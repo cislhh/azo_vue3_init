@@ -83,4 +83,67 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router';
+import { ref, computed } from 'vue';
+
+// 正确的类型定义
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  age: number;
+}
+
+const user = ref<User>({
+  id: 1,
+  name: '张三',
+  email: 'zhangsan@example.com',
+  age: 25
+});
+
+// 正确的类型使用
+const userName = computed(() => user.value.name);
+const userAge = computed(() => user.value.age);
+
+// 正确的函数类型定义
+const greet = (name: string): string => {
+  return `你好，${name}！`;
+};
+
+// 正确的数组类型
+const numbers: number[] = [1, 2, 3, 4, 5];
+const sum = numbers.reduce((a, b) => a + b, 0);
+
+// 错误的类型使用 - 类型不匹配
+const wrongType: string = 123;
+
+// 错误的类型使用 - 访问不存在的属性
+const wrongProperty = user.value.phoneNumber;
+
+// 错误的函数类型定义
+const addNumbers = (a: string, b: string): number => {
+  return a + b;
+};
+
+// 错误的数组类型
+const wrongArray: string[] = [1, 2, 3, 'string', true];
+
+// 错误的接口实现
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+const product: Product = {
+  id: 1,
+  name: '商品',
+  // 缺少必需的 price 属性
+};
+
+// 更明显的错误：不存在的变量
+const test = undefinedVariable;
+
+// 类型断言错误
+const obj = { a: 1 };
+const wrongCast = obj as string;
 </script>

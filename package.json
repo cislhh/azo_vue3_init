@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "type-check": "vue-tsc --noEmit",
-    "lint": "eslint . --fix",
+    "build": "tsc --noEmit --project tsconfig.app.json && vite build",
+    "type-check": "tsc --noEmit --project tsconfig.app.json",
+    "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest",
     "check": "npm run type-check && npm run lint"
@@ -49,7 +49,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,vue}": [
-      "eslint --fix"
+      "eslint"
     ],
     "*.{json,md,css,scss}": [
       "prettier --write"
