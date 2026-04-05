@@ -6,12 +6,18 @@
     "scripts": {
         "dev": "vite",
         "build": "tsc --noEmit --project tsconfig.app.json && vite build",
+        "test": "vitest",
+        "format": "prettier --write .",
         "type-check": "tsc --noEmit --project tsconfig.app.json",
         "lint": "eslint .",
         "lint:css": "stylelint '**/*.{css,scss,vue}'",
-        "format": "prettier --write .",
-        "test": "vitest",
-        "check": "npm run type-check && npm run lint && npm run lint:css"
+        "check": "npm run type-check && npm run lint && npm run lint:css",
+        "check:ts": "npm run type-check",
+        "check:eslint": "npm run lint",
+        "check:css": "npm run lint:css",
+        "fix": "npm run fix:eslint && npm run fix:css && npm run format",
+        "fix:eslint": "eslint . --fix",
+        "fix:css": "stylelint '**/*.{css,scss,vue}' --fix"
     },
     "dependencies": {
         "@logicflow/core": "^2.1.11",
@@ -39,8 +45,6 @@
         "@vue/tsconfig": "^0.9.0",
         "commitlint": "^20.5.0",
         "eslint-plugin-format": "^2.0.1",
-        "husky": "^9.1.7",
-        "lint-staged": "^16.4.0",
         "prettier": "^3.8.1",
         "prettier-plugin-tailwindcss": "^0.7.2",
         "stylelint": "^17.6.0",
@@ -51,17 +55,5 @@
         "vite-plugin-checker": "^0.12.0",
         "vitest": "^4.1.2",
         "vue-tsc": "^3.2.5"
-    },
-    "lint-staged": {
-        "*.{js,jsx,ts,tsx,vue}": [
-            "eslint"
-        ],
-        "*.{css,scss,vue}": [
-            "stylelint --fix",
-            "prettier --write"
-        ],
-        "*.{json,md}": [
-            "prettier --write"
-        ]
     }
 }
