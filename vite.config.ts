@@ -2,7 +2,7 @@ import vue from "@vitejs/plugin-vue";
 import path from "path";
 import { defineConfig } from "vite";
 import tailwindcss from '@tailwindcss/vite'
-import checker from "vite-plugin-checker";
+// import checker from "vite-plugin-checker";
 import VueRouter from "vue-router/vite"; // ✅ Vue Router 5 内置文件路由
 
 export default defineConfig({
@@ -18,12 +18,8 @@ export default defineConfig({
     }),
     vue(),
     tailwindcss(),
-    // ✅ 异步类型检查：后台运行，不阻塞 HMR
-    checker({
-      vueTsc: { tsconfigPath: "./tsconfig.json" },
-      enableBuild: false,
-      overlay: { initialIsOpen: false },
-    }),
+    // 禁用 vite-plugin-checker 以提升开发体验
+    // 需要类型检查时手动运行 npm run type-check
   ],
   resolve: {
     alias: { "@": path.resolve(__dirname, "src") },
