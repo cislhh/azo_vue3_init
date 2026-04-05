@@ -1,8 +1,8 @@
 <!-- 最小可用版本：仅包含路由出口 -->
 <template>
-    <main class="min-h-screen bg-gray-50">
-        <RouterView />
-    </main>
+  <main class="min-h-screen bg-gray-50">
+    <RouterView />
+  </main>
 </template>
 
 <script setup lang="ts">

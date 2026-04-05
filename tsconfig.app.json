@@ -1,5 +1,5 @@
 {
-  "extends": "@vue/tsconfig/tsconfig.dom.json",  // ✅ 必留
+  "extends": "@vue/tsconfig/tsconfig.dom.json", // ✅ 必留
   "compilerOptions": {
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
@@ -17,7 +17,7 @@
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] },
     "incremental": true,
-    "types": ["vite/client"]  // ✅ 新增：让 TS 识别 import.meta.env
+    "types": ["vite/client"] // ✅ 新增：让 TS 识别 import.meta.env
   },
   "include": [
     "src/**/*.ts",

@@ -1,7 +1,7 @@
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 import { defineConfig } from "vite";
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
 // import checker from "vite-plugin-checker";
 import VueRouter from "vue-router/vite"; // ✅ Vue Router 5 内置文件路由
 
