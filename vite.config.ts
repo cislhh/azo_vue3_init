@@ -4,7 +4,6 @@ import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import VueRouter from 'vue-router/vite';
 import fs from 'fs';
-import fg from 'fast-glob';
 
 /**
  * 扫描 modules 目录，自动生成路由文件夹配置
@@ -18,27 +17,24 @@ function getRouteFolders() {
         return ['src/pages']; // 降级方案
     }
 
-    // 获取所有包含 pages 目录的模块
-    const pagesDirs = fg.sync('*/pages', {
-        cwd: modulesDir,
-        onlyDirectories: true,
-        absolute: false,
-    });
+    const modules = fs.readdirSync(modulesDir, { withFileTypes: true });
+    const routeFolders: Array<string | { src: string; path: string }> = [];
 
-    if (pagesDirs.length === 0) {
-        return ['src/pages']; // 降级方案
+    for (const module of modules) {
+        if (module.isDirectory()) {
+            const modulePath = path.join(modulesDir, module.name);
+            const pagesPath = path.join(modulePath, 'pages');
+
+            if (fs.existsSync(pagesPath) && fs.statSync(pagesPath).isDirectory()) {
+                routeFolders.push({
+                    src: `src/modules/${module.name}/pages`,
+                    path: `${module.name}/`,
+                });
+            }
+        }
     }
 
-    // 为每个模块生成路由配置
-    const routeFolders = pagesDirs.map((pagesDir: string) => {
-        const moduleName = pagesDir.split('/')[0]; // 获取模块名
-        return {
-            src: `src/modules/${pagesDir}`,
-            path: `${moduleName}/`, // 路由前缀
-        };
-    });
-
-    return routeFolders;
+    return routeFolders.length > 0 ? routeFolders : ['src/pages'];
 }
 
 export default defineConfig({
