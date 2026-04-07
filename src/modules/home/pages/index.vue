@@ -5,7 +5,7 @@ import { NButton } from 'naive-ui';
 
 <template>
     <div class="min-h-screen from-blue-50 to-indigo-100">
-        <n-button>naive-ui</n-button>
-        <n-button>clear</n-button>
+        <NButton>naive-ui</NButton>
+        <NButton>clear</NButton>
     </div>
 </template>
