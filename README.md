@@ -105,20 +105,27 @@ pnpm test          # 运行测试
 azo-vue3-init/
 ├── public/           # 静态资源
 ├── src/
-│   ├── app/          # 应用核心代码
-│   │   ├── router/   # 路由配置
-│   │   └── styles/   # 全局样式
-│   ├── core/         # 核心工具
-│   │   └── http/     # HTTP 请求封装
-│   ├── modules/      # 业务模块
+│   ├── app/          # 应用核心
+│   │   ├── router/   # 路由配置（Vue Router 5）
+│   │   ├── stores/   # Pinia 状态管理
+│   │   ├── plugins/  # Vue 插件
+│   │   ├── styles/   # 全局样式
+│   │   └── pages/    # 非模块级页面（如 404）
+│   ├── core/         # 核心基础设施
+│   │   ├── http/     # HTTP 请求封装
+│   │   ├── auth/     # 认证逻辑
+│   │   ├── error/    # 错误处理
+│   │   └── logger/   # 日志系统
+│   ├── modules/      # 业务模块（含 pages 子目录）
+│   ├── shared/       # 跨模块共享
+│   │   ├── components/  # 通用 UI 组件
+│   │   ├── hooks/       # 可复用逻辑
+│   │   ├── utils/       # 工具函数
+│   │   └── types/       # 通用类型
+│   ├── layouts/      # 页面布局组件
+│   ├── components/   # 业务组件
 │   ├── main.ts       # 应用入口
 │   └── env.d.ts      # 环境变量类型定义
-├── .editorconfig     # 编辑器配置
-├── .prettierrc       # Prettier 配置
-├── eslint.config.mjs # ESLint 配置
-├── stylelint.config.mjs  # Stylelint 配置
-├── tsconfig.json     # TypeScript 配置
-└── vite.config.ts    # Vite 配置
 ```
 
 ## 代码规范
