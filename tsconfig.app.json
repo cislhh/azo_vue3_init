@@ -18,7 +18,7 @@
     "paths": { "@/*": ["src/*"] },
     "incremental": true,
     "types": ["vite/client"], // ✅ 新增：让 TS 识别 import.meta.env
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "5.0"
   },
   "include": [
     "src/**/*.ts",
