@@ -59,6 +59,14 @@ src/
 └── layouts/      # 布局组件
 ```
 
+### 业务模块开发（强制）
+
+- 开发 `src/modules/*` 业务模块前，必须先使用 `vue-best-practices` skill
+- 开发 `src/modules/*` 业务模块时，优先参考 `docs/module-development-reference.md`
+- 新模块默认沿用 `user` 模块的 `pages / components / composables` 三层结构
+- 模块内禁止新增 `api/` 目录；接口统一放在 `src/core/http/` 下，按模块或功能建目录，并在 `src/core/http/api.ts` 统一导出
+- `.vue` 文件保持轻量，页面级业务逻辑、状态编排、事件处理、数据映射优先放到 `composables/*.ts`
+
 ### 忽略目录
 
 - `dist/` - 构建产物
