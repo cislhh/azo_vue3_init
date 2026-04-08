@@ -23,7 +23,6 @@ pnpm lint:css     # Stylelint 检查
 pnpm check        # type-check + lint + lint:css
 
 # 自动修复
-pnpm fix          # 修复 ESLint + CSS + 格式化代码
 pnpm format       # Prettier 格式化
 
 # 测试
@@ -43,15 +42,11 @@ pnpm test         # 运行 Vitest 测试
 ### TypeScript 配置
 
 - 使用项目引用（tsconfig.json 引用 tsconfig.app.json 和 tsconfig.node.json）
-- 路径别名：`@/*` → `src/*`
 - 构建前强制类型检查（build 命令包含 tsc --noEmit）
 
 ### 代码风格（强制）
 
-- **4 空格缩进**（非 2 空格）
-- 单引号 + 分号
-- Tailwind 类名自动排序（prettier-plugin-tailwindcss）
-- Stylelint 忽略 Vue 文件（仅检查 CSS/SCSS）
+- 遵循项目中`.prettierrc`文件的规范
 
 ### 目录结构
 
@@ -66,7 +61,6 @@ src/
 
 ### 忽略目录
 
-- `otherfile/` - 完全忽略（ESLint、Stylelint、Git）
 - `dist/` - 构建产物
 
 ## Git 提交规范
@@ -89,6 +83,7 @@ src/
 
 - 描述 ≤ 50 字符，必须使用中文
 - 禁止 Co-Authored-By（单人提交）
+- 禁止修改route-map.d.ts
 
 ## 完成工作后
 
