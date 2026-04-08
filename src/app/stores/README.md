@@ -84,18 +84,18 @@ if (import.meta.hot) {
 ```ts
 // types.ts
 export interface User {
-    id: number
-    username: string
-    email: string
-    role: 'admin' | 'user' | 'guest'
-    createdAt: string
+    id: number;
+    username: string;
+    email: string;
+    role: 'admin' | 'user' | 'guest';
+    createdAt: string;
 }
 
 export interface UserState {
-    currentUser: User | null
-    users: User[]
-    loading: boolean
-    error: string | null
+    currentUser: User | null;
+    users: User[];
+    loading: boolean;
+    error: string | null;
 }
 ```
 
@@ -117,11 +117,9 @@ async function fetchUsers() {
     try {
         const data = await api.getUsers();
         users.value = data;
-    }
-    catch (err) {
+    } catch (err) {
         error.value = err instanceof Error ? err.message : '获取失败';
-    }
-    finally {
+    } finally {
         loading.value = false;
     }
 }

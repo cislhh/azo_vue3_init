@@ -2,7 +2,7 @@
 import type { User } from '@/app/stores/types';
 
 interface Props {
-    user: User
+    user: User;
 }
 
 defineProps<Props>();

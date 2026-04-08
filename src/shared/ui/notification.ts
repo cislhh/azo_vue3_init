@@ -2,9 +2,9 @@ import type { NotificationType } from 'naive-ui';
 import { createDiscreteApi } from 'naive-ui';
 
 interface NotifyOptions {
-    content: string
-    meta?: string
-    duration?: number
+    content: string;
+    meta?: string;
+    duration?: number;
 }
 
 const { notification } = createDiscreteApi(['notification']);

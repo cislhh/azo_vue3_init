@@ -53,12 +53,10 @@ export const useUserStore = defineStore('user', () => {
             }
             error.value = '用户名或密码错误';
             return false;
-        }
-        catch (err) {
+        } catch (err) {
             error.value = err instanceof Error ? err.message : '登录失败';
             return false;
-        }
-        finally {
+        } finally {
             loading.value = false;
         }
     }

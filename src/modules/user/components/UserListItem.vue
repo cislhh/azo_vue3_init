@@ -2,12 +2,12 @@
 import type { User } from '@/app/stores/types';
 
 interface Props {
-    user: User
-    showLogin?: boolean
+    user: User;
+    showLogin?: boolean;
 }
 
 interface Emits {
-    login: [username: string]
+    login: [username: string];
 }
 
 const props = withDefaults(defineProps<Props>(), {

@@ -19,11 +19,9 @@ export function useUserPage() {
                 createdAt: new Date().toISOString(),
             }));
             userStore.setUsers(mappedUsers);
-        }
-        catch (err) {
+        } catch (err) {
             error.value = err instanceof Error ? err.message : '获取用户列表失败';
-        }
-        finally {
+        } finally {
             loading.value = false;
         }
     }
