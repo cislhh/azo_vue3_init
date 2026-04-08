@@ -108,7 +108,6 @@ azo-vue3-init/
 │   ├── app/          # 应用核心
 │   │   ├── router/   # 路由配置（Vue Router 5）
 │   │   ├── stores/   # Pinia 状态管理
-│   │   ├── plugins/  # Vue 插件
 │   │   ├── styles/   # 全局样式
 │   │   └── pages/    # 非模块级页面（如 404）
 │   ├── core/         # 核心基础设施

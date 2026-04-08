@@ -1,14 +1,14 @@
 <script setup lang="ts">
 interface Props {
-    loading: boolean;
-    hasCurrentUser: boolean;
+    loading: boolean
+    hasCurrentUser: boolean
 }
 
 interface Emits {
-    fetch: [];
-    logout: [];
-    addUser: [];
-    reset: [];
+    fetch: []
+    logout: []
+    addUser: []
+    reset: []
 }
 
 const props = defineProps<Props>();

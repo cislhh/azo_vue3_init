@@ -41,34 +41,6 @@ export const useUserStore = defineStore('user', () => {
         }
     }
 
-    async function fetchUsers() {
-        loading.value = true;
-        error.value = null;
-        try {
-            const mockUsers: User[] = [
-                {
-                    id: 1,
-                    username: 'admin',
-                    email: 'admin@example.com',
-                    role: 'admin',
-                    createdAt: new Date().toISOString(),
-                },
-                {
-                    id: 2,
-                    username: 'user1',
-                    email: 'user1@example.com',
-                    role: 'user',
-                    createdAt: new Date().toISOString(),
-                },
-            ];
-            users.value = mockUsers;
-        } catch (err) {
-            error.value = err instanceof Error ? err.message : '获取用户列表失败';
-        } finally {
-            loading.value = false;
-        }
-    }
-
     async function login(username: string, password: string): Promise<boolean> {
         loading.value = true;
         error.value = null;
@@ -81,10 +53,12 @@ export const useUserStore = defineStore('user', () => {
             }
             error.value = '用户名或密码错误';
             return false;
-        } catch (err) {
+        }
+        catch (err) {
             error.value = err instanceof Error ? err.message : '登录失败';
             return false;
-        } finally {
+        }
+        finally {
             loading.value = false;
         }
     }
@@ -113,7 +87,6 @@ export const useUserStore = defineStore('user', () => {
         addUser,
         updateUser,
         removeUser,
-        fetchUsers,
         login,
         logout,
         $reset,

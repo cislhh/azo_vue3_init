@@ -1,12 +1,31 @@
 import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/app/stores/user';
+import { api } from '@/core/http/api';
 
 export function useUserPage() {
     const userStore = useUserStore();
     const { currentUser, users, loading, error, isLoggedIn, userCount } = storeToRefs(userStore);
 
-    function handleFetchUsers() {
-        userStore.fetchUsers();
+    async function handleFetchUsers() {
+        loading.value = true;
+        error.value = null;
+        try {
+            const response = await api.users.getAll();
+            const mappedUsers = response.data.map((u) => ({
+                id: u.id,
+                username: u.username,
+                email: u.email,
+                role: 'user' as const,
+                createdAt: new Date().toISOString(),
+            }));
+            userStore.setUsers(mappedUsers);
+        }
+        catch (err) {
+            error.value = err instanceof Error ? err.message : '获取用户列表失败';
+        }
+        finally {
+            loading.value = false;
+        }
     }
 
     function handleLogin(username: string) {

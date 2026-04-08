@@ -2,6 +2,6 @@
 
 /* v4 中自定义主题直接使用 @theme 指令，不再需要 tailwind.config.js */
 @theme {
-    --color-brand: #3b82f6;
-    --font-sans: 'Inter', sans-serif;
+  --color-brand: #3b82f6;
+  --font-sans: 'Inter', sans-serif;
 }

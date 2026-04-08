@@ -1,0 +1,57 @@
+import { http } from './index';
+
+export interface Post {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
+}
+
+export interface User {
+    id: number;
+    name: string;
+    username: string;
+    email: string;
+    phone: string;
+    website: string;
+    address: {
+        street: string;
+        suite: string;
+        city: string;
+        zipcode: string;
+        geo: {
+            lat: string;
+            lng: string;
+        };
+    };
+    company: {
+        name: string;
+        catchPhrase: string;
+        bs: string;
+    };
+}
+
+export interface Comment {
+    postId: number;
+    id: number;
+    name: string;
+    email: string;
+    body: string;
+}
+
+export const api = {
+    posts: {
+        getAll: () => http.get<Post[]>('/posts'),
+        getById: (id: number) => http.get<Post>(`/posts/${id}`),
+        create: (data: Omit<Post, 'id'>) => http.post<Post>('/posts', data),
+        update: (id: number, data: Partial<Post>) => http.put<Post>(`/posts/${id}`, data),
+        delete: (id: number) => http.delete(`/posts/${id}`),
+    },
+    users: {
+        getAll: () => http.get<User[]>('/users'),
+        getById: (id: number) => http.get<User>(`/users/${id}`),
+    },
+    comments: {
+        getByPostId: (postId: number) => http.get<Comment[]>(`/posts/${postId}/comments`),
+    },
+};

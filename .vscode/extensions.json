@@ -1,9 +1,9 @@
 // .vscode/extensions.json
 {
-    "recommendations": [
-        "Vue.volar",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode",
-        "stylelint.vscode-stylelint"
-    ]
+  "recommendations": [
+    "Vue.volar",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "stylelint.vscode-stylelint"
+  ]
 }

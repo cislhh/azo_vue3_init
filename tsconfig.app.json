@@ -1,30 +1,30 @@
 {
-    "extends": "@vue/tsconfig/tsconfig.dom.json", // ✅ 必留
-    "compilerOptions": {
-        "composite": true,
-        "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "strict": true,
-        "jsx": "preserve",
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "esModuleInterop": true,
-        "lib": ["ESNext", "DOM"],
-        "skipLibCheck": true,
-        "noEmit": true,
-        "baseUrl": ".",
-        "paths": { "@/*": ["src/*"] },
-        "incremental": true,
-        "types": ["vite/client"], // ✅ 新增：让 TS 识别 import.meta.env
-        "ignoreDeprecations": "5.0"
-    },
-    "include": [
-        "src/**/*.ts",
-        "src/**/*.d.ts",
-        "src/**/*.tsx",
-        "src/**/*.vue",
-        "src/route-map.d.ts"
-    ]
+  "extends": "@vue/tsconfig/tsconfig.dom.json", // ✅ 必留
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tsbuildinfo",
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "incremental": true,
+    "types": ["vite/client"], // ✅ 新增：让 TS 识别 import.meta.env
+    "ignoreDeprecations": "5.0"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "src/route-map.d.ts"
+  ]
 }
