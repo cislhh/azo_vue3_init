@@ -1,93 +1,163 @@
 import { computed, ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
-import type { User } from './types';
+import { usePermissionStore } from './permission';
+import type { PermissionEntry, User, UserSessionPayload } from './types';
+
+export const USER_SESSION_STORAGE_KEY = 'user-session';
+
+function isUser(value: unknown): value is User {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+    const hasValidId = typeof candidate.id === 'number' || typeof candidate.id === 'string';
+
+    return (
+        hasValidId &&
+        typeof candidate.name === 'string' &&
+        typeof candidate.account === 'string' &&
+        typeof candidate.email === 'string'
+    );
+}
+
+function isPermissionEntry(value: unknown): value is PermissionEntry {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+
+    return (
+        typeof candidate.key === 'string' &&
+        typeof candidate.label === 'string' &&
+        typeof candidate.path === 'string'
+    );
+}
+
+function isUserSessionPayload(value: unknown): value is UserSessionPayload {
+    if (typeof value !== 'object' || value === null) {
+        return false;
+    }
+
+    const candidate = value as Record<string, unknown>;
+
+    return (
+        typeof candidate.token === 'string' &&
+        isUser(candidate.user) &&
+        Array.isArray(candidate.permissions) &&
+        candidate.permissions.every(isPermissionEntry)
+    );
+}
+
+export function getPersistedSessionToken() {
+    if (typeof localStorage === 'undefined') {
+        return null;
+    }
+
+    const rawSession = localStorage.getItem(USER_SESSION_STORAGE_KEY);
+    if (!rawSession) {
+        return null;
+    }
+
+    try {
+        const parsedSession = JSON.parse(rawSession) as unknown;
+        return isUserSessionPayload(parsedSession) ? parsedSession.token : null;
+    } catch {
+        return null;
+    }
+}
 
 export const useUserStore = defineStore('user', () => {
+    const permissionStore = usePermissionStore();
+    const token = ref<string | null>(null);
     const currentUser = ref<User | null>(null);
-    const users = ref<User[]>([]);
-    const loading = ref(false);
-    const error = ref<string | null>(null);
+    const permissions = ref<PermissionEntry[]>([]);
+    const initialized = ref(false);
 
-    const isLoggedIn = computed(() => currentUser.value !== null);
-    const isAdmin = computed(() => currentUser.value?.role === 'admin');
-    const userCount = computed(() => users.value.length);
+    const isLoggedIn = computed(() => Boolean(token.value && currentUser.value));
 
-    function setCurrentUser(user: User | null) {
-        currentUser.value = user;
+    function syncPermissionStore(entries: PermissionEntry[]) {
+        permissionStore.setAuthorityBtns(entries);
     }
 
-    function setUsers(userList: User[]) {
-        users.value = userList;
+    function applySession(payload: UserSessionPayload) {
+        token.value = payload.token;
+        currentUser.value = payload.user;
+        permissions.value = payload.permissions;
+        initialized.value = true;
+        syncPermissionStore(payload.permissions);
     }
 
-    function addUser(user: User) {
-        users.value.push(user);
+    function clearSessionState() {
+        token.value = null;
+        currentUser.value = null;
+        permissions.value = [];
+        initialized.value = true;
+        permissionStore.clearAuthorityBtns();
     }
 
-    function updateUser(userId: number, updates: Partial<User>) {
-        const index = users.value.findIndex((u) => u.id === userId);
-        if (index !== -1) {
-            users.value[index] = { ...users.value[index], ...updates };
-            if (currentUser.value?.id === userId) {
-                currentUser.value = { ...currentUser.value, ...updates };
-            }
+    function persistSession(payload: UserSessionPayload) {
+        if (typeof localStorage === 'undefined') {
+            return;
         }
+
+        localStorage.setItem(USER_SESSION_STORAGE_KEY, JSON.stringify(payload));
     }
 
-    function removeUser(userId: number) {
-        users.value = users.value.filter((u) => u.id !== userId);
-        if (currentUser.value?.id === userId) {
-            currentUser.value = null;
+    function clearPersistedSession() {
+        if (typeof localStorage === 'undefined') {
+            return;
         }
+
+        localStorage.removeItem(USER_SESSION_STORAGE_KEY);
     }
 
-    async function login(username: string, password: string): Promise<boolean> {
-        loading.value = true;
-        error.value = null;
+    function loginSuccess(payload: UserSessionPayload) {
+        applySession(payload);
+        persistSession(payload);
+    }
+
+    function restoreSession() {
+        if (typeof localStorage === 'undefined') {
+            clearSessionState();
+            return;
+        }
+
+        const rawSession = localStorage.getItem(USER_SESSION_STORAGE_KEY);
+        if (!rawSession) {
+            clearPersistedSession();
+            clearSessionState();
+            return;
+        }
+
         try {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-            const user = users.value.find((u) => u.username === username);
-            if (user) {
-                currentUser.value = user;
-                return true;
+            const parsedSession = JSON.parse(rawSession) as unknown;
+            if (!isUserSessionPayload(parsedSession)) {
+                throw new Error('invalid session payload');
             }
-            error.value = '用户名或密码错误';
-            return false;
-        } catch (err) {
-            error.value = err instanceof Error ? err.message : '登录失败';
-            return false;
-        } finally {
-            loading.value = false;
+
+            applySession(parsedSession);
+        } catch {
+            clearPersistedSession();
+            clearSessionState();
         }
     }
 
     function logout() {
-        currentUser.value = null;
-    }
-
-    function $reset() {
-        currentUser.value = null;
-        users.value = [];
-        loading.value = false;
-        error.value = null;
+        clearPersistedSession();
+        clearSessionState();
     }
 
     return {
+        token,
         currentUser,
-        users,
-        loading,
-        error,
+        permissions,
+        initialized,
         isLoggedIn,
-        isAdmin,
-        userCount,
-        setCurrentUser,
-        setUsers,
-        addUser,
-        updateUser,
-        removeUser,
-        login,
+        loginSuccess,
+        restoreSession,
         logout,
-        $reset,
     };
 });
 

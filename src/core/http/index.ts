@@ -1,6 +1,6 @@
 import { router } from '@/app/router';
 import type { AuthorityButton } from '@/app/stores';
-import { pinia, usePermissionStore } from '@/app/stores';
+import { getPersistedSessionToken, pinia, usePermissionStore, useUserStore } from '@/app/stores';
 import { notifyError, notifyWarning } from '@/shared/ui/notification';
 import type {
     AxiosError,
@@ -82,13 +82,15 @@ function notifyHttpError(message: string, config?: RequestConfig) {
     notifyError(message);
 }
 
+function clearAuthSession() {
+    useUserStore(pinia).logout();
+}
+
 function handleBusinessCode(response: ApiResponse) {
     const message = response.message;
 
     if (response.code === 301 || response.code === 302) {
-        if (typeof localStorage !== 'undefined') {
-            localStorage.removeItem('token');
-        }
+        clearAuthSession();
         notifyError(message);
         void router.push('/login');
         return createHttpError(message, response.code, response);
@@ -161,8 +163,8 @@ export function createHttpInstance(config?: AxiosRequestConfig): HttpClient {
 
     axiosInstance.interceptors.request.use(
         (requestConfig: InternalAxiosRequestConfig & RequestConfig) => {
-            if (!requestConfig.skipAuth && typeof localStorage !== 'undefined') {
-                const token = localStorage.getItem('token');
+            if (!requestConfig.skipAuth) {
+                const token = getPersistedSessionToken();
                 if (token) {
                     requestConfig.headers.Authorization = `Bearer ${token}`;
                 }
@@ -202,9 +204,7 @@ export function createHttpInstance(config?: AxiosRequestConfig): HttpClient {
                             data as Partial<RawApiResponse>,
                             '未授权，请重新登录',
                         );
-                        if (typeof localStorage !== 'undefined') {
-                            localStorage.removeItem('token');
-                        }
+                        clearAuthSession();
                         if (typeof window !== 'undefined') {
                             window.location.href = '/login';
                         }

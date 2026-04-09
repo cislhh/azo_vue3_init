@@ -48,6 +48,14 @@ pnpm test         # 运行 Vitest 测试
 
 - 遵循项目中`.prettierrc`文件的规范
 
+### UI 开发规范（强制）
+
+- 页面骨架、外层布局、栅格分布、间距编排优先使用 Tailwind CSS
+- 表单控件、按钮、消息反馈、弹层等交互组件优先使用 Naive UI，避免重复封装基础控件
+- 使用 Tailwind CSS 进行布局开发时，优先遵循 `tailwindcss-advanced-layouts` skill；如果当前环境未提供该 skill，也要按同样目标控制布局复用和层次清晰
+- 通用 layout、页面骨架、内容容器、表单区块要优先抽成可复用组件，避免在页面里重复拼装相同结构
+- 业务页面先保证布局骨架统一，再在骨架内部组合 Naive UI 组件，不要整页直接堆叠 Naive UI 组件替代页面布局
+
 ### 目录结构
 
 ```
@@ -66,6 +74,7 @@ src/
 - 新模块默认沿用 `user` 模块的 `pages / components / composables` 三层结构
 - 模块内禁止新增 `api/` 目录；接口统一放在 `src/core/http/` 下，按模块或功能建目录，并在 `src/core/http/api.ts` 统一导出
 - `.vue` 文件保持轻量，页面级业务逻辑、状态编排、事件处理、数据映射优先放到 `composables/*.ts`
+- 页面布局和通用骨架优先复用共享组件，不要在模块页面里重复编写相同的外层结构
 
 ### 忽略目录
 

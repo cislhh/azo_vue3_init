@@ -1,4 +1,5 @@
 import { http } from './index';
+import { login } from './auth/login';
 
 export interface Post {
     userId: number;
@@ -40,6 +41,9 @@ export interface Comment {
 }
 
 export const api = {
+    auth: {
+        login,
+    },
     posts: {
         getAll: () => http.get<Post[]>('/posts'),
         getById: (id: number) => http.get<Post>(`/posts/${id}`),

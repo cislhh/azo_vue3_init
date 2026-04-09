@@ -1,7 +1,8 @@
-import { ref } from 'vue';
 import { acceptHMRUpdate, defineStore } from 'pinia';
+import { ref } from 'vue';
+import type { PermissionEntry } from './types';
 
-export type AuthorityButton = Record<string, unknown> | string | number;
+export type AuthorityButton = PermissionEntry;
 
 export const usePermissionStore = defineStore('permission', () => {
     const authorityBtns = ref<AuthorityButton[]>([]);

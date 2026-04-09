@@ -2,7 +2,7 @@ import type { InternalAxiosRequestConfig } from 'axios';
 import { AxiosError } from 'axios';
 import { createPinia, setActivePinia } from 'pinia';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { usePermissionStore } from '@/app/stores';
+import { pinia, usePermissionStore, useUserStore } from '@/app/stores';
 import { router } from '@/app/router';
 import { notifyError, notifyWarning } from '@/shared/ui/notification';
 import { createHttpInstance } from './index';
@@ -49,6 +49,7 @@ function createNetworkErrorAdapter() {
 }
 
 describe('http 业务响应处理', () => {
+    const setItem = vi.fn();
     const removeItem = vi.fn();
 
     beforeEach(() => {
@@ -58,6 +59,7 @@ describe('http 业务响应处理', () => {
         Object.defineProperty(globalThis, 'localStorage', {
             value: {
                 getItem: vi.fn(),
+                setItem,
                 removeItem,
             },
             configurable: true,
@@ -81,11 +83,68 @@ describe('http 业务响应处理', () => {
         const response = await client.get('/profile');
 
         expect(response.code).toBe(0);
-        expect(usePermissionStore().authorityBtns).toEqual(['create', 'edit']);
+        expect(usePermissionStore(pinia).authorityBtns).toEqual(['create', 'edit']);
     });
 
-    it('301 和 302 登录失效时清 token 并跳转登录页', async () => {
+    it('请求拦截器会从 user-session 读取 token 并写入认证头', async () => {
+        const getItem = vi.fn((key: string) => {
+            if (key === 'user-session') {
+                return JSON.stringify({
+                    token: 'session-token',
+                    user: {
+                        id: 1,
+                        name: '测试用户',
+                        account: 'tester',
+                        email: 'tester@example.com',
+                    },
+                    permissions: [],
+                });
+            }
+
+            return null;
+        });
+        Object.defineProperty(globalThis, 'localStorage', {
+            value: {
+                getItem,
+                setItem,
+                removeItem,
+            },
+            configurable: true,
+        });
+        const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => ({
+            data: {
+                code: 0,
+                data: config.headers.Authorization,
+                message: 'success',
+            },
+            status: 200,
+            statusText: 'OK',
+            headers: {},
+            config,
+        }));
+        const client = createHttpInstance({ adapter });
+
+        const response = await client.get<string>('/profile');
+
+        expect(getItem).toHaveBeenCalledWith('user-session');
+        expect(response.data).toBe('Bearer session-token');
+    });
+
+    it('301 和 302 登录失效时会真正清空会话与权限并跳转登录页', async () => {
         const codes = [301, 302];
+        const userStore = useUserStore(pinia);
+        const permissionStore = usePermissionStore(pinia);
+
+        userStore.loginSuccess({
+            token: 'session-token',
+            user: {
+                id: 1,
+                name: '测试用户',
+                account: 'tester',
+                email: 'tester@example.com',
+            },
+            permissions: [{ key: 'create', label: '创建', path: '/content/create' }],
+        });
 
         for (const code of codes) {
             const client = createHttpInstance({
@@ -102,9 +161,45 @@ describe('http 业务响应处理', () => {
             });
         }
 
-        expect(removeItem).toHaveBeenCalledWith('token');
+        expect(userStore.token).toBeNull();
+        expect(userStore.currentUser).toBeNull();
+        expect(userStore.permissions).toEqual([]);
+        expect(permissionStore.authorityBtns).toEqual([]);
+        expect(removeItem).toHaveBeenCalledWith('user-session');
         expect(router.push).toHaveBeenCalledWith('/login');
         expect(notifyError).toHaveBeenCalledWith('登录已失效');
+    });
+
+    it('401 未授权时会真正清空会话与权限并跳转登录页', async () => {
+        const userStore = useUserStore(pinia);
+        const permissionStore = usePermissionStore(pinia);
+
+        userStore.loginSuccess({
+            token: 'session-token',
+            user: {
+                id: 1,
+                name: '测试用户',
+                account: 'tester',
+                email: 'tester@example.com',
+            },
+            permissions: [{ key: 'create', label: '创建', path: '/content/create' }],
+        });
+
+        const client = createHttpInstance({
+            adapter: createHttpErrorAdapter(401, { message: '登录已过期' }),
+        });
+
+        await expect(client.get('/profile')).rejects.toMatchObject({
+            code: 401,
+            message: '登录已过期',
+        });
+
+        expect(userStore.token).toBeNull();
+        expect(userStore.currentUser).toBeNull();
+        expect(userStore.permissions).toEqual([]);
+        expect(permissionStore.authorityBtns).toEqual([]);
+        expect(removeItem).toHaveBeenCalledWith('user-session');
+        expect(notifyError).toHaveBeenCalledWith('登录已过期');
     });
 
     it.each([
