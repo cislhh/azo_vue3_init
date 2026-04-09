@@ -1,6 +1,6 @@
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
-import type { RouteLocationNormalized, RouteMeta, RouteRecordRaw, RouterHistory } from 'vue-router';
 import type { Pinia } from 'pinia';
+import type { RouteLocationNormalized, RouteMeta, RouteRecordRaw, RouterHistory } from 'vue-router';
 import { routes as moduleRoutes } from 'vue-router/auto-routes';
 import DefaultLayout from '@/layouts/DefaultLayout.vue';
 import { pinia, useUserStore } from '@/app/stores';
@@ -20,19 +20,28 @@ const enhancedRoutes = moduleRoutes.map((route) => {
     } as RouteRecordRaw;
 });
 
-const staticRoutes: RouteRecordRaw[] = [
-    {
-        path: '/login',
-        component: () => import('@/modules/auth/pages/Login.vue'),
-        meta: { layout: null, requiresAuth: false },
-    },
-    {
-        path: '/:pathMatch(.*)*',
-        name: 'NotFound',
-        component: () => import('@/app/pages/NotFound.vue'),
-        meta: { layout: null, requiresAuth: false },
-    },
-];
+function createStaticRoutes(piniaInstance: Pinia): RouteRecordRaw[] {
+    return [
+        {
+            path: '/',
+            redirect: () => {
+                return useUserStore(piniaInstance).isLoggedIn ? '/home' : '/login';
+            },
+            meta: { layout: null, requiresAuth: false },
+        },
+        {
+            path: '/login',
+            component: () => import('@/modules/auth/pages/Login.vue'),
+            meta: { layout: null, requiresAuth: false },
+        },
+        {
+            path: '/:pathMatch(.*)*',
+            name: 'NotFound',
+            component: () => import('@/app/pages/NotFound.vue'),
+            meta: { layout: null, requiresAuth: false },
+        },
+    ];
+}
 
 function createDefaultHistory() {
     return typeof window === 'undefined' ? createMemoryHistory() : createWebHistory();
@@ -43,13 +52,14 @@ function isPublicRoute(route: RouteLocationNormalized) {
 }
 
 export function createAppRouter(options?: { history?: RouterHistory; pinia?: Pinia }) {
+    const piniaInstance = options?.pinia ?? pinia;
     const appRouter = createRouter({
         history: options?.history ?? createDefaultHistory(),
-        routes: [...staticRoutes, ...enhancedRoutes],
+        routes: [...createStaticRoutes(piniaInstance), ...enhancedRoutes],
     });
 
     appRouter.beforeEach((to) => {
-        const userStore = useUserStore(options?.pinia ?? pinia);
+        const userStore = useUserStore(piniaInstance);
 
         if (!userStore.initialized) {
             userStore.restoreSession();

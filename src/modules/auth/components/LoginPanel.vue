@@ -38,9 +38,6 @@ const emit = defineEmits<{
                             <h2 class="text-4xl leading-tight font-semibold">
                                 统一身份登录，快速进入业务工作台
                             </h2>
-                            <p class="text-sm leading-7 text-slate-300">
-                                登录页只负责认证入口，成功后会恢复当前用户会话并跳转到首页。
-                            </p>
                         </div>
                     </div>
                 </section>

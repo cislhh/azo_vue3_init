@@ -56,6 +56,12 @@ pnpm test         # 运行 Vitest 测试
 - 通用 layout、页面骨架、内容容器、表单区块要优先抽成可复用组件，避免在页面里重复拼装相同结构
 - 业务页面先保证布局骨架统一，再在骨架内部组合 Naive UI 组件，不要整页直接堆叠 Naive UI 组件替代页面布局
 
+### 开发参考文档（按问题查阅）
+
+- 模块目录边界、`pages / components / composables` 职责不清时：`docs/module-development-reference.md`
+- 文件路由规则、静态路由配合、`route-map.d.ts` 相关问题时：`docs/FILE_ROUTING.md`
+- 遇到登录认证、token 持久化、mock 联调、根路径分流、全局样式污染等问题时：`docs/开发记录/2026-04-09-登录模块开发记录.md`
+
 ### 目录结构
 
 ```
@@ -71,6 +77,7 @@ src/
 
 - 开发 `src/modules/*` 业务模块前，必须先使用 `vue-best-practices` skill
 - 开发 `src/modules/*` 业务模块时，优先参考 `docs/module-development-reference.md`
+- 遇到登录认证、mock 联调、根路由分流、全局样式污染等问题时，优先查阅 `docs/开发记录/2026-04-09-登录模块开发记录.md`
 - 新模块默认沿用 `user` 模块的 `pages / components / composables` 三层结构
 - 模块内禁止新增 `api/` 目录；接口统一放在 `src/core/http/` 下，按模块或功能建目录，并在 `src/core/http/api.ts` 统一导出
 - `.vue` 文件保持轻量，页面级业务逻辑、状态编排、事件处理、数据映射优先放到 `composables/*.ts`

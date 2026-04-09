@@ -50,6 +50,33 @@ describe('app router 守卫', () => {
         expect(storage.getItem).toHaveBeenCalledWith('user-session');
     });
 
+    it('未登录访问 / 会跳转到 /login', async () => {
+        const pinia = createPinia();
+        const router = createAppRouter({
+            history: createMemoryHistory(),
+            pinia,
+        });
+
+        await router.push('/');
+        await router.isReady();
+
+        expect(router.currentRoute.value.fullPath).toBe('/login');
+    });
+
+    it('已登录访问 / 会跳转到 /home', async () => {
+        const pinia = createPinia();
+        storage.getItem.mockReturnValue(JSON.stringify(createSessionPayload()));
+        const router = createAppRouter({
+            history: createMemoryHistory(),
+            pinia,
+        });
+
+        await router.push('/');
+        await router.isReady();
+
+        expect(router.currentRoute.value.fullPath).toBe('/home');
+    });
+
     it('已登录访问 /login 会跳转到 /home', async () => {
         const pinia = createPinia();
         storage.getItem.mockReturnValue(JSON.stringify(createSessionPayload()));
