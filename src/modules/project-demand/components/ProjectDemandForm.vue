@@ -17,6 +17,7 @@ defineProps<{
 
 defineEmits<{
     'update:form-field': [key: keyof ProjectDemandFormModel, value: string];
+    editContract: [];
 }>();
 </script>
 
@@ -156,7 +157,7 @@ defineEmits<{
             <div class="rounded-sm border border-[#e5e7eb] p-4 xl:col-span-2">
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-sm font-medium text-[#374151]">合同模板</span>
-                    <NButton secondary>编辑合同</NButton>
+                    <NButton secondary @click="$emit('editContract')">编辑合同</NButton>
                     <NButton secondary>重置模板</NButton>
                     <span class="ml-2 text-sm text-[#6b7280]">需要加盖电子印章</span>
                     <NSelect

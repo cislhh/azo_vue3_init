@@ -1,5 +1,6 @@
 import { http } from './index';
 import { login } from './auth/login';
+import { getProjectDemandContractTemplate } from './project-demand/get-contract-template';
 
 export interface Post {
     userId: number;
@@ -43,6 +44,9 @@ export interface Comment {
 export const api = {
     auth: {
         login,
+    },
+    projectDemand: {
+        getContractTemplate: getProjectDemandContractTemplate,
     },
     posts: {
         getAll: () => http.get<Post[]>('/posts'),

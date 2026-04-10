@@ -1,3 +1,5 @@
+import { api } from '@/core/http/api';
+import type { ProjectDemandContractTemplateDto } from '@/core/http/project-demand/get-contract-template';
 import { computed, reactive, ref, shallowRef } from 'vue';
 
 export interface ProjectDemandMemberRow {
@@ -70,6 +72,23 @@ interface ProjectDemandFormErrors {
     contactPhone: string;
 }
 
+export interface OnlyOfficeDocumentConfig {
+    document: {
+        fileType: ProjectDemandContractTemplateDto['fileType'];
+        key: string;
+        title: string;
+        url: string;
+    };
+    documentType: ProjectDemandContractTemplateDto['documentType'];
+    editorConfig: {
+        callbackUrl?: string;
+    };
+}
+
+const SUPPORTED_CONTRACT_TEMPLATE_FILE_TYPES = new Set<
+    ProjectDemandContractTemplateDto['fileType']
+>(['pdf', 'doc', 'docx']);
+
 function createEmptyErrors(): ProjectDemandFormErrors {
     return {
         projectName: '',
@@ -83,6 +102,51 @@ function createEmptyErrors(): ProjectDemandFormErrors {
         campus: '',
         contactPhone: '',
     };
+}
+
+function mapContractTemplateToEditorConfig(
+    template: ProjectDemandContractTemplateDto,
+    documentUrl: string,
+): OnlyOfficeDocumentConfig {
+    return {
+        document: {
+            fileType: template.fileType,
+            key: template.documentKey,
+            title: template.title,
+            url: documentUrl,
+        },
+        documentType: template.documentType,
+        editorConfig: {
+            callbackUrl: template.callbackUrl,
+        },
+    };
+}
+
+function resolveDocumentAccessUrl(documentUrl: string, accessHost: string) {
+    const locationOrigin = globalThis.location?.origin;
+
+    if (!locationOrigin) {
+        return documentUrl;
+    }
+
+    const resolvedUrl = new URL(documentUrl, locationOrigin);
+
+    if (!accessHost) {
+        return resolvedUrl.toString();
+    }
+
+    const normalizedAccessHost = accessHost.includes('://')
+        ? new URL(accessHost)
+        : new URL(`${resolvedUrl.protocol}//${accessHost}`);
+
+    resolvedUrl.protocol = normalizedAccessHost.protocol;
+    resolvedUrl.hostname = normalizedAccessHost.hostname;
+
+    if (normalizedAccessHost.port) {
+        resolvedUrl.port = normalizedAccessHost.port;
+    }
+
+    return resolvedUrl.toString();
 }
 
 export function useProjectDemandPage() {
@@ -149,9 +213,19 @@ export function useProjectDemandPage() {
     ]);
     const assigneeOptions = computed(() => [{ label: '李佳', value: '李佳' }]);
     const messageState = shallowRef('');
+    const documentServerUrl = computed(
+        () =>
+            import.meta.env.VITE_ONLYOFFICE_URL?.trim() ??
+            import.meta.env.VITE_ONLYOFFICE_DOCUMENT_SERVER_URL?.trim() ??
+            '',
+    );
+    const fileAccessHost = computed(() => import.meta.env.VITE_FILE_ACCESS_HOST?.trim() ?? '');
     const formErrors = reactive(createEmptyErrors());
     const memberDialogVisible = shallowRef(false);
     const editingMember = shallowRef<ProjectDemandMemberRow | null>(null);
+    const contractEditorVisible = shallowRef(false);
+    const contractEditorLoading = shallowRef(false);
+    const contractEditorConfig = shallowRef<OnlyOfficeDocumentConfig | null>(null);
 
     function validateForm() {
         Object.assign(formErrors, createEmptyErrors());
@@ -218,6 +292,55 @@ export function useProjectDemandPage() {
     async function saveDraft(): Promise<DraftResult> {
         messageState.value = '已暂存（模拟）';
         return { ok: true };
+    }
+
+    async function openContractEditor() {
+        if (!form.contractType) {
+            messageState.value = '请先选择合同类型';
+            return;
+        }
+
+        if (!documentServerUrl.value) {
+            messageState.value = 'OnlyOffice 服务地址未配置';
+            return;
+        }
+
+        contractEditorLoading.value = true;
+
+        try {
+            const response = await api.projectDemand.getContractTemplate({
+                contractType: form.contractType,
+            });
+            const template = response.data;
+
+            if (!template.documentUrl) {
+                throw new Error('未获取到合同模板地址');
+            }
+
+            if (!SUPPORTED_CONTRACT_TEMPLATE_FILE_TYPES.has(template.fileType)) {
+                throw new Error('当前合同模板格式不支持在线编辑/预览');
+            }
+
+            const documentAccessUrl = resolveDocumentAccessUrl(
+                template.documentUrl,
+                fileAccessHost.value,
+            );
+
+            contractEditorConfig.value = mapContractTemplateToEditorConfig(
+                template,
+                documentAccessUrl,
+            );
+            contractEditorVisible.value = true;
+        } catch (error) {
+            messageState.value =
+                error instanceof Error ? error.message : '打开合同模板失败，请稍后重试';
+        } finally {
+            contractEditorLoading.value = false;
+        }
+    }
+
+    function closeContractEditor() {
+        contractEditorVisible.value = false;
     }
 
     function upsertMember(input: Partial<ProjectDemandMemberRow>): MemberActionResult {
@@ -340,10 +463,16 @@ export function useProjectDemandPage() {
         yesNoOptions,
         assigneeOptions,
         messageState,
+        documentServerUrl,
         memberDialogVisible,
         editingMember,
+        contractEditorVisible,
+        contractEditorLoading,
+        contractEditorConfig,
         submit,
         saveDraft,
+        openContractEditor,
+        closeContractEditor,
         upsertMember,
         removeMember,
         openCreateMemberDialog,

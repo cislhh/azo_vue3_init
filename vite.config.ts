@@ -1,9 +1,11 @@
-import { defineConfig } from 'vite';
-import vue from '@vitejs/plugin-vue';
-import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
-import VueRouter from 'vue-router/vite';
+import vue from '@vitejs/plugin-vue';
 import fs from 'fs';
+import path from 'path';
+import { defineConfig } from 'vite';
+import VueRouter from 'vue-router/vite';
+
+const ONLYOFFICE_PROXY_PREFIX_RE = /^\/onlyoffice/;
 
 /**
  * 扫描 modules 目录，自动生成路由文件夹配置
@@ -46,6 +48,18 @@ export default defineConfig({
         vue(),
         tailwindcss(),
     ],
+    server: {
+        cors: true,
+        host: '0.0.0.0',
+        proxy: {
+            // 代理 OnlyOffice 请求，避免 CORS 问题
+            '/onlyoffice': {
+                target: 'http://localhost:8080',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(ONLYOFFICE_PROXY_PREFIX_RE, ''),
+            },
+        },
+    },
     resolve: {
         alias: { '@': path.resolve(__dirname, 'src') },
     },

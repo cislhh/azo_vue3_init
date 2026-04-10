@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import OnlyOfficeDocumentModal from '../components/OnlyOfficeDocumentModal.vue';
 import ProjectDemandForm from '../components/ProjectDemandForm.vue';
 import ProjectDemandMemberTable from '../components/ProjectDemandMemberTable.vue';
 import ProjectDemandToolbar from '../components/ProjectDemandToolbar.vue';
@@ -20,10 +21,16 @@ const {
     memberRoleOptions,
     yesNoOptions,
     assigneeOptions,
+    documentServerUrl,
     memberDialogVisible,
     editingMember,
+    contractEditorVisible,
+    contractEditorLoading,
+    contractEditorConfig,
     submit,
     saveDraft,
+    openContractEditor,
+    closeContractEditor,
     removeMember,
     openCreateMemberDialog,
     openEditMemberDialog,
@@ -65,6 +72,7 @@ const {
             :campus-options="campusOptions"
             :yes-no-options="yesNoOptions"
             @update:form-field="updateFormField"
+            @edit-contract="openContractEditor"
         />
 
         <ProjectDemandMemberTable
@@ -77,6 +85,14 @@ const {
             @remove="removeMember"
             @save="saveMember"
             @cancel="closeMemberDialog"
+        />
+
+        <OnlyOfficeDocumentModal
+            :show="contractEditorVisible"
+            :loading="contractEditorLoading"
+            :document-server-url="documentServerUrl"
+            :config="contractEditorConfig"
+            @close="closeContractEditor"
         />
     </div>
 </template>
