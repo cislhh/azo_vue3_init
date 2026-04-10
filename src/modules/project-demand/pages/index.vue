@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import OnlyOfficeDocumentModal from '../components/OnlyOfficeDocumentModal.vue';
+import { OnlyOfficeDocumentModal } from '@/components/onlyoffice';
+
 import ProjectDemandForm from '../components/ProjectDemandForm.vue';
 import ProjectDemandMemberTable from '../components/ProjectDemandMemberTable.vue';
 import ProjectDemandToolbar from '../components/ProjectDemandToolbar.vue';

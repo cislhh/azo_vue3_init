@@ -10,7 +10,7 @@ export default antfu(
         // 缓存位置
         cacheLocation: './node_modules/.cache/eslint-cache',
         // 忽略 otherfile 文件夹
-        ignores: ['otherfile/**'],
+        ignores: ['otherfile/**', 'public/onlyoffice-plugins/**'],
     },
     {
         rules: {

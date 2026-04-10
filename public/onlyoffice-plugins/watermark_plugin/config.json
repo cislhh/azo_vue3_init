@@ -1,0 +1,28 @@
+{
+  "name": "一键水印",
+  "guid": "asc.{6B5A1D6E-C1B5-4C8E-9E5A-7D1E8F2B5C3D}",
+  "baseUrl": "./",
+  "version": "1.0.0",
+  "group": {
+    "name": "plugins",
+    "rank": 2
+  },
+  "variations": [
+    {
+      "description": "为 Word 文档自动添加图片水印",
+      "url": "index.html",
+      "icons": [
+        "resources/icon.png"
+      ],
+      "isViewer": false,
+      "EditorsSupport": [
+        "word"
+      ],
+      "type": "unvisible",
+      "initDataType": "none",
+      "initData": "",
+      "isUpdateOleOnResize": true,
+      "buttons": []
+    }
+  ]
+}

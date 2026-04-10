@@ -30,3 +30,9 @@ docs/*
 
 AGENTS.md
 opencode.json
+
+# public 演示文档
+public/test.pdf
+public/old.docx
+public/new.docx
+public/test.xlsx

@@ -1,4 +1,5 @@
 import { api } from '@/core/http/api';
+import type { OnlyOfficeDocumentConfig } from '@/components/onlyoffice';
 import type { ProjectDemandContractTemplateDto } from '@/core/http/project-demand/get-contract-template';
 import { computed, reactive, ref, shallowRef } from 'vue';
 
@@ -72,22 +73,9 @@ interface ProjectDemandFormErrors {
     contactPhone: string;
 }
 
-export interface OnlyOfficeDocumentConfig {
-    document: {
-        fileType: ProjectDemandContractTemplateDto['fileType'];
-        key: string;
-        title: string;
-        url: string;
-    };
-    documentType: ProjectDemandContractTemplateDto['documentType'];
-    editorConfig: {
-        callbackUrl?: string;
-    };
-}
-
 const SUPPORTED_CONTRACT_TEMPLATE_FILE_TYPES = new Set<
     ProjectDemandContractTemplateDto['fileType']
->(['pdf', 'doc', 'docx']);
+>(['pdf', 'doc', 'docx', 'xlsx']);
 
 function createEmptyErrors(): ProjectDemandFormErrors {
     return {
@@ -202,7 +190,11 @@ export function useProjectDemandPage() {
     const provinceOptions = computed(() => [{ label: '吉林省', value: '吉林省' }]);
     const cityOptions = computed(() => [{ label: '长春市', value: '长春市' }]);
     const campusOptions = computed(() => [{ label: '中心校区', value: '中心校区' }]);
-    const contractTypeOptions = computed(() => [{ label: '技术开发', value: '技术开发' }]);
+    const contractTypeOptions = computed(() => [
+        { label: '技术开发', value: '技术开发' },
+        { label: '产品需求', value: '产品需求' },
+        { label: '接口文档', value: '接口文档' },
+    ]);
     const memberRoleOptions = computed(() => [
         { label: '项目负责人', value: '项目负责人' },
         { label: '成员', value: '成员' },
@@ -341,6 +333,7 @@ export function useProjectDemandPage() {
 
     function closeContractEditor() {
         contractEditorVisible.value = false;
+        contractEditorConfig.value = null;
     }
 
     function upsertMember(input: Partial<ProjectDemandMemberRow>): MemberActionResult {
