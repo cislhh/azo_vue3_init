@@ -48,6 +48,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    '/project-demand/': RouteRecordInfo<
+      '/project-demand/',
+      '/project-demand',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
   }
 
   /**
@@ -76,6 +83,12 @@ declare module 'vue-router/auto-routes' {
     'src/modules/home/pages/index.vue': {
       routes:
         | '/home/'
+      views:
+        | never
+    }
+    'src/modules/project-demand/pages/index.vue': {
+      routes:
+        | '/project-demand/'
       views:
         | never
     }
