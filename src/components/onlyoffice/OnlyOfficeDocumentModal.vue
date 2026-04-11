@@ -28,6 +28,7 @@ const pluginDefinitions = computed(() =>
     buildOnlyOfficePluginDefinitions({
         documentType: props.config?.documentType,
         fileType: props.config?.document.fileType,
+        pluginVersion: import.meta.env.VITE_ONLYOFFICE_TOOLBAR_PLUGIN_VERSION,
     }),
 );
 

@@ -16,7 +16,7 @@ describe('useProjectDemandPage', () => {
         vi.stubEnv('VITE_ONLYOFFICE_URL', 'http://localhost:80');
         vi.stubEnv('VITE_FILE_ACCESS_HOST', '');
         vi.stubGlobal('location', {
-            origin: 'http://localhost:5173',
+            origin: 'http://192.168.0.133:5173',
         });
     });
 
@@ -45,7 +45,7 @@ describe('useProjectDemandPage', () => {
         });
         expect(page.contractEditorVisible.value).toBe(true);
         expect(page.contractEditorConfig.value?.document.url).toBe(
-            'http://localhost:5173/test.pdf',
+            'http://192.168.0.133:5173/test.pdf',
         );
     });
 

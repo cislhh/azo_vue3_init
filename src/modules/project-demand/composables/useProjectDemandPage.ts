@@ -1,5 +1,6 @@
 import { api } from '@/core/http/api';
 import type { OnlyOfficeDocumentConfig } from '@/components/onlyoffice';
+import { resolveOnlyOfficeDocumentUrl } from '@/components/onlyoffice/file-access';
 import type { ProjectDemandContractTemplateDto } from '@/core/http/project-demand/get-contract-template';
 import { computed, reactive, ref, shallowRef } from 'vue';
 
@@ -110,34 +111,10 @@ function mapContractTemplateToEditorConfig(
     };
 }
 
-function resolveDocumentAccessUrl(documentUrl: string, accessHost: string) {
-    const locationOrigin = globalThis.location?.origin;
-
-    if (!locationOrigin) {
-        return documentUrl;
-    }
-
-    const resolvedUrl = new URL(documentUrl, locationOrigin);
-
-    if (!accessHost) {
-        return resolvedUrl.toString();
-    }
-
-    const normalizedAccessHost = accessHost.includes('://')
-        ? new URL(accessHost)
-        : new URL(`${resolvedUrl.protocol}//${accessHost}`);
-
-    resolvedUrl.protocol = normalizedAccessHost.protocol;
-    resolvedUrl.hostname = normalizedAccessHost.hostname;
-
-    if (normalizedAccessHost.port) {
-        resolvedUrl.port = normalizedAccessHost.port;
-    }
-
-    return resolvedUrl.toString();
-}
-
 export function useProjectDemandPage() {
+    const globalScope = globalThis as typeof globalThis & {
+        __ONLYOFFICE_DEV_ACCESS_HOST__?: string;
+    };
     const toolbarForm = reactive<ProjectDemandToolbarForm>({
         isBidProject: 'no',
         workflow: 'main-leader',
@@ -212,6 +189,7 @@ export function useProjectDemandPage() {
             '',
     );
     const fileAccessHost = computed(() => import.meta.env.VITE_FILE_ACCESS_HOST?.trim() ?? '');
+    const devAccessHost = computed(() => globalScope.__ONLYOFFICE_DEV_ACCESS_HOST__ ?? '');
     const formErrors = reactive(createEmptyErrors());
     const memberDialogVisible = shallowRef(false);
     const editingMember = shallowRef<ProjectDemandMemberRow | null>(null);
@@ -313,10 +291,12 @@ export function useProjectDemandPage() {
                 throw new Error('当前合同模板格式不支持在线编辑/预览');
             }
 
-            const documentAccessUrl = resolveDocumentAccessUrl(
-                template.documentUrl,
-                fileAccessHost.value,
-            );
+            const documentAccessUrl = resolveOnlyOfficeDocumentUrl({
+                currentOrigin: globalThis.location?.origin,
+                devAccessHost: devAccessHost.value,
+                documentUrl: template.documentUrl,
+                fileAccessHost: fileAccessHost.value,
+            });
 
             contractEditorConfig.value = mapContractTemplateToEditorConfig(
                 template,

@@ -1,5 +1,5 @@
 (function (window) {
-  var PLUGIN_VERSION = "20260327.11";
+  var PLUGIN_VERSION = "20260411.05";
   var TOOLBAR_TAB_ID = "empower_tools_tab";
   var TOOLBAR_ICON_PATH = "resources/icon.png";
   var PLUGIN_MESSAGE_SOURCE = "empower-toolbar-plugin";
@@ -8,6 +8,9 @@
   var toolbarMounted = false;
   var toolbarFeaturesById = Object.create(null);
   var runtimeContext = null;
+  var keyboardState = {
+    altKey: false,
+  };
 
   function showMessage(message) {
     window.alert(message);
@@ -116,6 +119,7 @@
 
   function createFeatureContext() {
     return {
+      altKey: keyboardState.altKey,
       pluginVersion: PLUGIN_VERSION,
       toolbarIconPath: TOOLBAR_ICON_PATH,
       showMessage: showMessage,
@@ -123,6 +127,10 @@
       asc: window.Asc,
       plugin: window.Asc && window.Asc.plugin ? window.Asc.plugin : null,
     };
+  }
+
+  function syncKeyboardState(event) {
+    keyboardState.altKey = !!(event && event.altKey);
   }
 
   function mountToolbar(features, context) {
@@ -201,6 +209,11 @@
     }
 
     window.addEventListener("message", onMessage);
+    window.addEventListener("keydown", syncKeyboardState, true);
+    window.addEventListener("keyup", syncKeyboardState, true);
+    window.addEventListener("blur", function () {
+      keyboardState.altKey = false;
+    });
     requestRuntimeContext();
 
     var features = getFeatures();

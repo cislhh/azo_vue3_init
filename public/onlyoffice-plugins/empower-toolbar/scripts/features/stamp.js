@@ -1,11 +1,96 @@
 (function (window) {
   var FEATURE_ID = "empower_insert_stamp";
+  var A4_PAGE_HEIGHT_EMU = 297 * 36000;
+  var A4_PAGE_WIDTH_EMU = 210 * 36000;
   var FIXED_STAMP_WIDTH_EMU = 160 * 9525;
   var FIXED_STAMP_HEIGHT_EMU = 160 * 9525;
   var FIXED_STAMP_MARGIN_EMU = 8 * 36000;
   var MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+  var DEBUG_STAMP_IMAGE_DATA_URL =
+    "data:image/svg+xml;charset=UTF-8," +
+    encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'>" +
+        "<circle cx='90' cy='90' r='82' fill='none' stroke='%23d11f2a' stroke-width='8'/>" +
+        "<text x='90' y='78' text-anchor='middle' font-size='24' fill='%23d11f2a' font-family='Arial'>TEST</text>" +
+        "<text x='90' y='112' text-anchor='middle' font-size='24' fill='%23d11f2a' font-family='Arial'>STAMP</text>" +
+      "</svg>"
+    );
   var fileInput = null;
   var featureContext = null;
+
+  function debugLog() {
+    if (!window.console || typeof window.console.log !== "function") return;
+
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[empower-toolbar][stamp]");
+    window.console.log.apply(window.console, args);
+  }
+
+  function debugError() {
+    if (!window.console || typeof window.console.error !== "function") return;
+
+    var args = Array.prototype.slice.call(arguments);
+    args.unshift("[empower-toolbar][stamp]");
+    window.console.error.apply(window.console, args);
+  }
+
+  function isLandscapeRotation(rotation) {
+    if (rotation == null) return false;
+
+    var normalizedRotation = Math.abs(rotation) % 360;
+    return normalizedRotation === 90 || normalizedRotation === 270;
+  }
+
+  function resolvePdfPageSize(page) {
+    var widthEmu = A4_PAGE_WIDTH_EMU;
+    var heightEmu = A4_PAGE_HEIGHT_EMU;
+    var rotation = null;
+
+    try {
+      if (page && typeof page.GetWidth === "function") {
+        var maybeWidth = page.GetWidth();
+        if (typeof maybeWidth === "number" && maybeWidth > 0) {
+          widthEmu = maybeWidth;
+        }
+      }
+    } catch (error) {}
+
+    try {
+      if (page && typeof page.GetHeight === "function") {
+        var maybeHeight = page.GetHeight();
+        if (typeof maybeHeight === "number" && maybeHeight > 0) {
+          heightEmu = maybeHeight;
+        }
+      }
+    } catch (error) {}
+
+    try {
+      if (page && typeof page.GetRotation === "function") {
+        rotation = page.GetRotation();
+      }
+    } catch (error) {}
+
+    if (isLandscapeRotation(rotation)) {
+      return {
+        heightEmu: widthEmu,
+        widthEmu: heightEmu,
+      };
+    }
+
+    return {
+      heightEmu: heightEmu,
+      widthEmu: widthEmu,
+    };
+  }
+
+  function calculatePdfStampPosition(page, stampWidthEmu, stampHeightEmu, marginEmu) {
+    var pageSize = resolvePdfPageSize(page);
+
+    return {
+      x: Math.max(0, pageSize.widthEmu - stampWidthEmu - marginEmu),
+      y: Math.max(0, pageSize.heightEmu - stampHeightEmu - marginEmu),
+    };
+  }
 
   function showMessage(message) {
     if (featureContext && typeof featureContext.showMessage === "function") {
@@ -31,6 +116,12 @@
     var input = createFileInput();
     input.value = "";
     input.click();
+  }
+
+  async function insertDebugStampImage() {
+    var size = await measureImage(DEBUG_STAMP_IMAGE_DATA_URL);
+    debugLog("debug stamp image measured", size);
+    insertStampImage(DEBUG_STAMP_IMAGE_DATA_URL, size.widthEmu, size.heightEmu);
   }
 
   function readAsDataUrl(file) {
@@ -68,6 +159,18 @@
   }
 
   function insertStampImage(dataUrl, widthEmu, heightEmu) {
+    debugLog("insert requested", {
+      fileType:
+        featureContext &&
+        featureContext.runtimeContext &&
+        featureContext.runtimeContext.fileType,
+      fixedStampHeightEmu: FIXED_STAMP_HEIGHT_EMU,
+      fixedStampMarginEmu: FIXED_STAMP_MARGIN_EMU,
+      fixedStampWidthEmu: FIXED_STAMP_WIDTH_EMU,
+      sourceHeightEmu: heightEmu,
+      sourceWidthEmu: widthEmu,
+    });
+
     Asc.scope.imageSrc = dataUrl;
     Asc.scope.widthEmu = widthEmu;
     Asc.scope.heightEmu = heightEmu;
@@ -83,6 +186,82 @@
         var fixedStampWidth = Asc.scope.fixedStampWidthEmu;
         var fixedStampHeight = Asc.scope.fixedStampHeightEmu;
         var fixedStampMargin = Asc.scope.fixedStampMarginEmu;
+        var a4PageWidthEmu = 210 * 36000;
+        var a4PageHeightEmu = 297 * 36000;
+        var commandLog = function () {
+          if (typeof console === "undefined" || typeof console.log !== "function") return;
+
+          var args = Array.prototype.slice.call(arguments);
+          args.unshift("[empower-toolbar][stamp][command]");
+          console.log.apply(console, args);
+        };
+        var commandError = function () {
+          if (typeof console === "undefined" || typeof console.error !== "function") return;
+
+          var args = Array.prototype.slice.call(arguments);
+          args.unshift("[empower-toolbar][stamp][command]");
+          console.error.apply(console, args);
+        };
+        var commandIsLandscapeRotation = function (rotation) {
+          if (rotation == null) return false;
+
+          var normalizedRotation = Math.abs(rotation) % 360;
+          return normalizedRotation === 90 || normalizedRotation === 270;
+        };
+        var commandResolvePdfPageSize = function (page) {
+          var widthEmu = a4PageWidthEmu;
+          var heightEmu = a4PageHeightEmu;
+          var rotation = null;
+
+          try {
+            if (page && typeof page.GetWidth === "function") {
+              var maybeWidth = page.GetWidth();
+              if (typeof maybeWidth === "number" && maybeWidth > 0) {
+                widthEmu = maybeWidth;
+              }
+            }
+          } catch (error) {}
+
+          try {
+            if (page && typeof page.GetHeight === "function") {
+              var maybeHeight = page.GetHeight();
+              if (typeof maybeHeight === "number" && maybeHeight > 0) {
+                heightEmu = maybeHeight;
+              }
+            }
+          } catch (error) {}
+
+          try {
+            if (page && typeof page.GetRotation === "function") {
+              rotation = page.GetRotation();
+            }
+          } catch (error) {}
+
+          if (commandIsLandscapeRotation(rotation)) {
+            return {
+              heightEmu: widthEmu,
+              rotation: rotation,
+              widthEmu: heightEmu,
+            };
+          }
+
+          return {
+            heightEmu: heightEmu,
+            rotation: rotation,
+            widthEmu: widthEmu,
+          };
+        };
+        var commandCalculatePdfStampPosition = function (page) {
+          var pageSize = commandResolvePdfPageSize(page);
+
+          return {
+            pageHeight: pageSize.heightEmu,
+            pageRotation: pageSize.rotation,
+            pageWidth: pageSize.widthEmu,
+            x: Math.max(0, pageSize.widthEmu - fixedStampWidth - fixedStampMargin),
+            y: Math.max(0, pageSize.heightEmu - fixedStampHeight - fixedStampMargin),
+          };
+        };
 
         try {
           if (typeof Api.GetActiveSheet === "function") {
@@ -119,6 +298,58 @@
           if (typeof Api.GetDocument === "function") {
             var doc = Api.GetDocument();
             var image = Api.CreateImage(imageSrc, fixedStampWidth, fixedStampHeight);
+            commandLog("document branch entered", {
+              hasAddDrawingToPage: !!(doc && typeof doc.AddDrawingToPage === "function"),
+              hasGetCurrentPage: !!(doc && typeof doc.GetCurrentPage === "function"),
+              hasGetPage: !!(doc && typeof doc.GetPage === "function"),
+            });
+
+            if (doc && typeof doc.GetPage === "function") {
+              var pageIndex = 0;
+              var pdfPage = null;
+
+              try {
+                if (typeof Api.GetCurrentPage === "function") {
+                  var currentPage = Api.GetCurrentPage();
+                  if (typeof currentPage === "number" && currentPage >= 0) {
+                    pageIndex = currentPage;
+                  }
+                }
+              } catch (error) {}
+
+              try {
+                pdfPage = doc.GetPage(pageIndex);
+              } catch (error) {
+                commandError("GetPage failed", error);
+                pdfPage = null;
+              }
+
+              if (pdfPage && typeof pdfPage.AddObject === "function") {
+                var pdfPosition = commandCalculatePdfStampPosition(pdfPage);
+
+                commandLog("pdf branch resolved", {
+                  pageHeight: pdfPosition.pageHeight,
+                  pageIndex: pageIndex,
+                  pageRotation: pdfPosition.pageRotation,
+                  pageWidth: pdfPosition.pageWidth,
+                  positionX: pdfPosition.x,
+                  positionY: pdfPosition.y,
+                });
+
+                if (image && typeof image.SetPosition === "function") {
+                  image.SetPosition(pdfPosition.x, pdfPosition.y);
+                }
+
+                pdfPage.AddObject(image);
+                commandLog("pdf branch inserted");
+                return;
+              }
+
+              commandLog("pdf branch unavailable", {
+                hasAddObject: !!(pdfPage && typeof pdfPage.AddObject === "function"),
+                pageIndex: pageIndex,
+              });
+            }
 
             if (image && typeof image.SetWrappingStyle === "function") {
               image.SetWrappingStyle("inFront");
@@ -173,6 +404,11 @@
               }
 
               doc.AddDrawingToPage(image, currentPage, x, y);
+              commandLog("word fallback inserted", {
+                currentPage: currentPage,
+                positionX: x,
+                positionY: y,
+              });
               return;
             }
 
@@ -197,27 +433,18 @@
 
             if (paragraph && typeof paragraph.AddDrawing === "function") {
               paragraph.AddDrawing(image);
+              commandLog("paragraph fallback inserted");
               return;
             }
-
-            if (doc && typeof doc.GetPage === "function") {
-              var page = doc.GetPage(0);
-              if (page && typeof page.AddObject === "function") {
-                if (image && typeof image.SetPosition === "function") {
-                  image.SetPosition(2 * 36000, 2 * 36000);
-                }
-                page.AddObject(image);
-              }
-            }
           }
-        } catch (error) {}
+        } catch (error) {
+          commandError("insert command failed", error);
+        }
       },
       false,
       true,
       function () {
-        if (window.console && typeof window.console.log === "function") {
-          window.console.log("[empower-toolbar] stamp inserted");
-        }
+        debugLog("callCommand callback completed");
       }
     );
   }
@@ -255,8 +482,10 @@
     try {
       var dataUrl = await readAsDataUrl(file);
       var size = await measureImage(dataUrl);
+      debugLog("image measured", size);
       insertStampImage(dataUrl, size.widthEmu, size.heightEmu);
     } catch (error) {
+      debugError("insert failed", error);
       showMessage("插入印章失败，请重试");
     }
   }
@@ -285,7 +514,15 @@
       featureContext = context;
       createFileInput();
     },
-    onClick: function () {
+    onClick: function (context) {
+      if (context && context.altKey) {
+        insertDebugStampImage().catch(function (error) {
+          debugError("debug stamp insert failed", error);
+          showMessage("调试印章插入失败，请重试");
+        });
+        return;
+      }
+
       openImagePicker();
     },
   };

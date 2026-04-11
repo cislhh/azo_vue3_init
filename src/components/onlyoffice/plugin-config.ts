@@ -13,6 +13,7 @@ interface BuildOnlyOfficePluginDefinitionsOptions {
     enableToolbar?: boolean;
     enableWatermark?: boolean;
     fileType?: string;
+    pluginVersion?: string;
 }
 
 interface BuildOnlyOfficeAllowedOriginsOptions {
@@ -21,12 +22,18 @@ interface BuildOnlyOfficeAllowedOriginsOptions {
     plugins: OnlyOfficePluginDefinition[];
 }
 
-function resolveAbsoluteUrl(path: string, baseOrigin?: string) {
+function resolveAbsoluteUrl(path: string, baseOrigin?: string, version?: string) {
     if (!baseOrigin) {
-        return path;
+        return version ? `${path}?v=${encodeURIComponent(version)}` : path;
     }
 
-    return new URL(path, baseOrigin).toString();
+    const url = new URL(path, baseOrigin);
+
+    if (version) {
+        url.searchParams.set('v', version);
+    }
+
+    return url.toString();
 }
 
 function isWordDocument(documentType?: OnlyOfficeDocumentType, fileType?: string) {
@@ -37,12 +44,13 @@ export function buildOnlyOfficePluginDefinitions(
     options: BuildOnlyOfficePluginDefinitionsOptions = {},
 ) {
     const baseOrigin = options.baseOrigin ?? globalThis.location?.origin;
+    const pluginVersion = options.pluginVersion?.trim();
     const plugins: OnlyOfficePluginDefinition[] = [];
 
     if (options.enableToolbar !== false) {
         plugins.push({
             autostart: true,
-            configUrl: resolveAbsoluteUrl(EMPOWER_TOOLBAR_CONFIG_PATH, baseOrigin),
+            configUrl: resolveAbsoluteUrl(EMPOWER_TOOLBAR_CONFIG_PATH, baseOrigin, pluginVersion),
             guid: 'empower-toolbar',
             name: '业务工具',
         });
@@ -54,7 +62,7 @@ export function buildOnlyOfficePluginDefinitions(
     ) {
         plugins.push({
             autostart: true,
-            configUrl: resolveAbsoluteUrl(WATERMARK_PLUGIN_CONFIG_PATH, baseOrigin),
+            configUrl: resolveAbsoluteUrl(WATERMARK_PLUGIN_CONFIG_PATH, baseOrigin, pluginVersion),
             guid: 'watermark-plugin',
             name: '一键水印',
         });

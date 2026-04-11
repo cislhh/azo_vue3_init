@@ -11,6 +11,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
             baseOrigin: 'http://localhost:5173',
             documentType: 'pdf',
             fileType: 'pdf',
+            pluginVersion: '20260411.01',
         });
 
         expect(plugins).toHaveLength(1);
@@ -18,7 +19,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
             guid: 'empower-toolbar',
             autostart: true,
             configUrl:
-                'http://localhost:5173/onlyoffice-plugins/empower-toolbar/config.json',
+                'http://localhost:5173/onlyoffice-plugins/empower-toolbar/config.json?v=20260411.01',
         });
     });
 
@@ -27,6 +28,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
             baseOrigin: 'http://localhost:5173',
             documentType: 'word',
             fileType: 'docx',
+            pluginVersion: '20260411.01',
         });
 
         expect(plugins.map((plugin) => plugin.guid)).toEqual([
@@ -40,6 +42,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
             baseOrigin: 'http://localhost:5173',
             documentType: 'cell',
             fileType: 'xlsx',
+            pluginVersion: '20260411.01',
         });
 
         expect(plugins.map((plugin) => plugin.guid)).toEqual(['empower-toolbar']);
@@ -52,13 +55,14 @@ describe('buildOnlyOfficePluginsConfig', () => {
             baseOrigin: 'http://localhost:5173',
             documentType: 'word',
             fileType: 'docx',
+            pluginVersion: '20260411.01',
         });
 
         expect(buildOnlyOfficePluginsConfig(plugins)).toEqual({
             autostart: ['empower-toolbar', 'watermark-plugin'],
             pluginsData: [
-                'http://localhost:5173/onlyoffice-plugins/empower-toolbar/config.json',
-                'http://localhost:5173/onlyoffice-plugins/watermark_plugin/config.json',
+                'http://localhost:5173/onlyoffice-plugins/empower-toolbar/config.json?v=20260411.01',
+                'http://localhost:5173/onlyoffice-plugins/watermark_plugin/config.json?v=20260411.01',
             ],
         });
     });
@@ -70,6 +74,7 @@ describe('buildOnlyOfficeAllowedOrigins', () => {
             baseOrigin: 'http://localhost:5173',
             documentType: 'word',
             fileType: 'docx',
+            pluginVersion: '20260411.01',
         });
 
         expect(
