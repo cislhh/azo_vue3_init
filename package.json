@@ -16,7 +16,8 @@
         "check:ts": "pnpm type-check",
         "check:eslint": "pnpm lint",
         "check:css": "pnpm lint:css",
-        "check:format": "pnpm format:check"
+        "check:format": "pnpm format:check",
+        "deploy:onlyoffice-plugin": "./deploy-plugin.sh"
     },
     "dependencies": {
         "@logicflow/core": "^2.1.11",

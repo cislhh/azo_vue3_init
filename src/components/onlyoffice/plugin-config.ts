@@ -6,7 +6,6 @@ import type {
 
 const EMPOWER_TOOLBAR_CONFIG_PATH = '/onlyoffice-plugins/empower-toolbar/config.json';
 const WATERMARK_PLUGIN_CONFIG_PATH = '/onlyoffice-plugins/watermark_plugin/config.json';
-
 interface BuildOnlyOfficePluginDefinitionsOptions {
     baseOrigin?: string;
     documentType?: OnlyOfficeDocumentType;

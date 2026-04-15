@@ -6,7 +6,7 @@ import {
 } from './plugin-config';
 
 describe('buildOnlyOfficePluginDefinitions', () => {
-    it('为 pdf 文档只启用业务工具栏插件', () => {
+    it('为 pdf 文档不启用业务工具栏插件', () => {
         const plugins = buildOnlyOfficePluginDefinitions({
             baseOrigin: 'http://localhost:5173',
             documentType: 'pdf',
@@ -14,13 +14,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
             pluginVersion: '20260411.01',
         });
 
-        expect(plugins).toHaveLength(1);
-        expect(plugins[0]).toMatchObject({
-            guid: 'empower-toolbar',
-            autostart: true,
-            configUrl:
-                'http://localhost:5173/onlyoffice-plugins/empower-toolbar/config.json?v=20260411.01',
-        });
+        expect(plugins).toEqual([]);
     });
 
     it('为 word 文档同时启用业务工具栏和水印插件', () => {
@@ -37,7 +31,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
         ]);
     });
 
-    it('为 excel 文档只启用业务工具栏插件', () => {
+    it('为 excel 文档不启用业务工具栏插件', () => {
         const plugins = buildOnlyOfficePluginDefinitions({
             baseOrigin: 'http://localhost:5173',
             documentType: 'cell',
@@ -45,7 +39,7 @@ describe('buildOnlyOfficePluginDefinitions', () => {
             pluginVersion: '20260411.01',
         });
 
-        expect(plugins.map((plugin) => plugin.guid)).toEqual(['empower-toolbar']);
+        expect(plugins).toEqual([]);
     });
 });
 
