@@ -17,5 +17,6 @@ describe('getProjectDemandWorkflowPreview', () => {
             '项目管理科',
             '结束',
         ]);
+        expect(response.data.edges.every((edge) => edge.type === 'bezier')).toBe(true);
     });
 });
