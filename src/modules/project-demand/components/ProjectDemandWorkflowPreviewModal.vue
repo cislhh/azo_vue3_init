@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import '@logicflow/core/lib/index.css';
 
-import { NButton, NModal } from 'naive-ui';
+import { NButton, NModal, NSpin } from 'naive-ui';
 import { nextTick, useTemplateRef, watch } from 'vue';
 
 const props = defineProps<{
     errorMessage: string;
+    loading: boolean;
     show: boolean;
 }>();
 
@@ -23,9 +24,9 @@ function handleUpdateShow(value: boolean) {
 }
 
 watch(
-    () => props.show,
-    async (show) => {
-        if (!show || props.errorMessage) {
+    () => [props.show, props.loading, props.errorMessage] as const,
+    async ([show, loading, errorMessage]) => {
+        if (!show || loading || errorMessage) {
             return;
         }
 
@@ -59,6 +60,13 @@ watch(
                 class="flex flex-1 items-center justify-center rounded-sm border border-[#fecaca] bg-[#fff1f2] text-sm text-[#be123c]"
             >
                 {{ props.errorMessage }}
+            </div>
+
+            <div
+                v-else-if="props.loading"
+                class="flex flex-1 items-center justify-center rounded-sm border border-[#e5e7eb] bg-white"
+            >
+                <NSpin size="large" />
             </div>
 
             <div

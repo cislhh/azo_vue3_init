@@ -4,7 +4,9 @@ import { OnlyOfficeDocumentModal } from '@/components/onlyoffice';
 import ProjectDemandForm from '../components/ProjectDemandForm.vue';
 import ProjectDemandMemberTable from '../components/ProjectDemandMemberTable.vue';
 import ProjectDemandToolbar from '../components/ProjectDemandToolbar.vue';
+import ProjectDemandWorkflowPreviewModal from '../components/ProjectDemandWorkflowPreviewModal.vue';
 import { useProjectDemandPage } from '../composables/useProjectDemandPage';
+import { useProjectDemandWorkflowPreview } from '../composables/useProjectDemandWorkflowPreview';
 
 const {
     toolbarForm,
@@ -40,6 +42,15 @@ const {
     updateToolbarField,
     updateFormField,
 } = useProjectDemandPage();
+
+const {
+    previewVisible,
+    previewError,
+    previewLoading,
+    openWorkflowPreview,
+    closeWorkflowPreview,
+    initializeWorkflowPreview,
+} = useProjectDemandWorkflowPreview();
 </script>
 
 <template>
@@ -59,6 +70,7 @@ const {
             @update:toolbar-field="updateToolbarField"
             @submit="submit"
             @save-draft="saveDraft"
+            @preview-flow="openWorkflowPreview"
         />
 
         <ProjectDemandForm
@@ -94,6 +106,14 @@ const {
             :document-server-url="documentServerUrl"
             :config="contractEditorConfig"
             @close="closeContractEditor"
+        />
+
+        <ProjectDemandWorkflowPreviewModal
+            :show="previewVisible"
+            :loading="previewLoading"
+            :error-message="previewError"
+            @close="closeWorkflowPreview"
+            @initialize="initializeWorkflowPreview"
         />
     </div>
 </template>

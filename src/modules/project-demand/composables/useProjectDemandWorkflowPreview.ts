@@ -1,72 +1,33 @@
 import LogicFlow from '@logicflow/core';
 import { shallowRef } from 'vue';
 
-export interface ProjectDemandWorkflowNode {
-    id: string;
-    type: 'circle' | 'rect';
-    x: number;
-    y: number;
-    text: string;
-}
-
-export interface ProjectDemandWorkflowEdge {
-    id: string;
-    type: 'polyline';
-    sourceNodeId: string;
-    targetNodeId: string;
-}
-
-export interface ProjectDemandWorkflowGraphData {
-    nodes: ProjectDemandWorkflowNode[];
-    edges: ProjectDemandWorkflowEdge[];
-}
-
-const projectDemandWorkflowGraphData: ProjectDemandWorkflowGraphData = {
-    nodes: [
-        { id: 'start', type: 'circle', x: 140, y: 120, text: '开始' },
-        { id: 'submit', type: 'rect', x: 340, y: 120, text: '项目负责人提交' },
-        { id: 'college', type: 'rect', x: 540, y: 120, text: '学院审核' },
-        { id: 'research', type: 'rect', x: 740, y: 120, text: '科研院审核' },
-        { id: 'finance', type: 'rect', x: 940, y: 120, text: '财务确认' },
-        { id: 'end', type: 'circle', x: 1140, y: 120, text: '结束' },
-    ],
-    edges: [
-        {
-            id: 'edge-start-submit',
-            type: 'polyline',
-            sourceNodeId: 'start',
-            targetNodeId: 'submit',
-        },
-        {
-            id: 'edge-submit-college',
-            type: 'polyline',
-            sourceNodeId: 'submit',
-            targetNodeId: 'college',
-        },
-        {
-            id: 'edge-college-research',
-            type: 'polyline',
-            sourceNodeId: 'college',
-            targetNodeId: 'research',
-        },
-        {
-            id: 'edge-research-finance',
-            type: 'polyline',
-            sourceNodeId: 'research',
-            targetNodeId: 'finance',
-        },
-        { id: 'edge-finance-end', type: 'polyline', sourceNodeId: 'finance', targetNodeId: 'end' },
-    ],
-};
+import { api } from '@/core/http/api';
+import type { ProjectDemandWorkflowPreviewDto } from '@/core/http/project-demand/get-workflow-preview';
 
 export function useProjectDemandWorkflowPreview() {
     const previewVisible = shallowRef(false);
     const previewError = shallowRef('');
+    const previewLoading = shallowRef(false);
+    const graphData = shallowRef<ProjectDemandWorkflowPreviewDto>({
+        nodes: [],
+        edges: [],
+    });
     const logicFlow = shallowRef<LogicFlow | null>(null);
 
-    function openWorkflowPreview() {
+    async function openWorkflowPreview() {
         previewVisible.value = true;
         previewError.value = '';
+        previewLoading.value = true;
+
+        try {
+            const response = await api.projectDemand.getWorkflowPreview();
+            graphData.value = response.data;
+        } catch (error) {
+            previewError.value =
+                error instanceof Error ? error.message : '流程图加载失败，请稍后重试';
+        } finally {
+            previewLoading.value = false;
+        }
     }
 
     function destroyWorkflowPreview() {
@@ -88,17 +49,22 @@ export function useProjectDemandWorkflowPreview() {
                 background: {
                     backgroundColor: '#f8fafc',
                 },
-                isSilentMode: true,
+                isSilentMode: false,
                 stopMoveGraph: false,
                 stopScrollGraph: false,
                 stopZoomGraph: false,
                 adjustEdge: false,
-                adjustNodePosition: false,
                 hideAnchors: true,
                 textEdit: false,
             });
 
-            instance.render(projectDemandWorkflowGraphData);
+            instance.updateEditConfig({
+                adjustEdge: false,
+                adjustNodePosition: true,
+                hideAnchors: true,
+                textEdit: false,
+            });
+            instance.render(graphData.value);
             logicFlow.value = instance;
         } catch (error) {
             previewError.value =
@@ -114,7 +80,8 @@ export function useProjectDemandWorkflowPreview() {
     return {
         previewVisible,
         previewError,
-        graphData: projectDemandWorkflowGraphData,
+        previewLoading,
+        graphData,
         openWorkflowPreview,
         closeWorkflowPreview,
         initializeWorkflowPreview,
