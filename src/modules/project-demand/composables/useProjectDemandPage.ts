@@ -96,6 +96,11 @@ function createEmptyErrors(): ProjectDemandFormErrors {
 function mapContractTemplateToEditorConfig(
     template: ProjectDemandContractTemplateDto,
     documentUrl: string,
+    revisedFile?: {
+        fileType: 'docx';
+        token?: string;
+        url: string;
+    },
     stampImageUrl?: string,
 ): OnlyOfficeDocumentConfig {
     return {
@@ -108,6 +113,7 @@ function mapContractTemplateToEditorConfig(
         documentType: template.documentType,
         editorConfig: {
             callbackUrl: template.callbackUrl,
+            revisedFile,
             stampImageUrl,
         },
     };
@@ -299,6 +305,18 @@ export function useProjectDemandPage() {
                 documentUrl: template.documentUrl,
                 fileAccessHost: fileAccessHost.value,
             });
+            const revisedFile =
+                template.documentType === 'word'
+                    ? {
+                          fileType: 'docx' as const,
+                          url: resolveOnlyOfficeDocumentUrl({
+                              currentOrigin: globalThis.location?.origin,
+                              devAccessHost: devAccessHost.value,
+                              documentUrl: '/old.docx',
+                              fileAccessHost: fileAccessHost.value,
+                          }),
+                      }
+                    : undefined;
 
             const stampImageUrl =
                 template.documentType === 'word'
@@ -308,6 +326,7 @@ export function useProjectDemandPage() {
             contractEditorConfig.value = mapContractTemplateToEditorConfig(
                 template,
                 documentAccessUrl,
+                revisedFile,
                 stampImageUrl,
             );
             contractEditorVisible.value = true;

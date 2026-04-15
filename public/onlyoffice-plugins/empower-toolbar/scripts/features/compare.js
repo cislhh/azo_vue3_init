@@ -2,8 +2,6 @@
   var FEATURE_ID = "empower_compare_document";
   var PLUGIN_MESSAGE_SOURCE = "empower-toolbar-plugin";
   var PLUGIN_MESSAGE_TYPE_COMPARE_FILE = "empower-toolbar:compare-file-selected";
-  var MAX_DOC_SIZE = 10 * 1024 * 1024;
-  var fileInput = null;
   var featureContext = null;
 
   function showMessage(message) {
@@ -14,31 +12,10 @@
     window.alert(message);
   }
 
-  function validateDocxFile(file) {
-    if (!file) return "请选择 docx 文档";
-
-    var ext = "";
-    if (typeof file.name === "string" && file.name.indexOf(".") >= 0) {
-      ext = file.name.split(".").pop().toLowerCase();
-    }
-
-    if (ext !== "docx") {
-      return "仅支持上传 .docx 作为对比文档";
-    }
-
-    if (file.size > MAX_DOC_SIZE) {
-      return "对比文档大小不能超过 10MB";
-    }
-
-    return "";
-  }
-
-  function sendCompareFileToHost(file) {
+  function sendCompareFileToHost() {
     var payload = {
       source: PLUGIN_MESSAGE_SOURCE,
       type: PLUGIN_MESSAGE_TYPE_COMPARE_FILE,
-      file: file,
-      fileName: file.name,
       timestamp: Date.now(),
       version: featureContext ? featureContext.pluginVersion : "",
     };
@@ -58,40 +35,6 @@
     } catch (error) {}
 
     return false;
-  }
-
-  async function onFileChanged(event) {
-    var file = event && event.target && event.target.files && event.target.files[0];
-    if (!file) return;
-
-    var validationError = validateDocxFile(file);
-    if (validationError) {
-      showMessage(validationError);
-      return;
-    }
-
-    if (!sendCompareFileToHost(file)) {
-      showMessage("无法触发文档对比，请稍后重试");
-    }
-  }
-
-  function createFileInput() {
-    if (fileInput) return fileInput;
-
-    fileInput = document.createElement("input");
-    fileInput.type = "file";
-    fileInput.accept =
-      ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-    fileInput.style.display = "none";
-    fileInput.addEventListener("change", onFileChanged);
-    document.body.appendChild(fileInput);
-    return fileInput;
-  }
-
-  function openDocPicker() {
-    var input = createFileInput();
-    input.value = "";
-    input.click();
   }
 
   var feature = {
@@ -116,10 +59,11 @@
     },
     onInit: function (context) {
       featureContext = context;
-      createFileInput();
     },
     onClick: function () {
-      openDocPicker();
+      if (!sendCompareFileToHost()) {
+        showMessage("无法触发文档对比，请稍后重试");
+      }
     },
   };
 

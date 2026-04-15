@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted } from 'vue';
+import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue';
 
 import { notifyError } from '@/shared/ui/notification';
 import { DocumentEditor } from '@onlyoffice/document-editor-vue';
 import { NModal, NSpin } from 'naive-ui';
 
+import { handleEmpowerToolbarCompareMessage } from './compare-runtime';
 import {
     buildOnlyOfficeAllowedOrigins,
     buildOnlyOfficePluginDefinitions,
@@ -23,6 +24,10 @@ const props = defineProps<{
 const emit = defineEmits<{
     close: [];
 }>();
+
+const editorInstance = shallowRef<{
+    setRevisedFile?: (payload: { fileType: 'docx'; token?: string; url: string }) => void;
+} | null>(null);
 
 const pluginDefinitions = computed(() =>
     buildOnlyOfficePluginDefinitions({
@@ -59,8 +64,23 @@ function handleLoadComponentError(errorCode: number, errorDescription: string) {
     notifyError('OnlyOffice 组件加载失败', `[${errorCode}] ${description}`);
 }
 
-function handlePluginMessage(event: MessageEvent) {
+async function handlePluginMessage(event: MessageEvent) {
     if (!props.config) {
+        return;
+    }
+
+    try {
+        const compareHandled = await handleEmpowerToolbarCompareMessage(event, {
+            allowedOrigins: allowedOrigins.value,
+            editor: editorInstance.value,
+            revisedFile: props.config.editorConfig.revisedFile ?? null,
+        });
+
+        if (compareHandled) {
+            return;
+        }
+    } catch (error) {
+        notifyError(error instanceof Error ? error.message : '触发文档对比失败');
         return;
     }
 
@@ -78,6 +98,26 @@ function handleUpdateShow(value: boolean) {
     if (!value) {
         emit('close');
     }
+}
+
+function handleDocumentReady() {
+    const globalScope = window as typeof window & {
+        DocEditor?: {
+            instances?: Record<
+                string,
+                {
+                    setRevisedFile?: (payload: {
+                        fileType: 'docx';
+                        token?: string;
+                        url: string;
+                    }) => void;
+                }
+            >;
+        };
+    };
+
+    editorInstance.value =
+        globalScope.DocEditor?.instances?.['project-demand-contract-editor'] ?? null;
 }
 
 onMounted(() => {
@@ -111,6 +151,7 @@ onBeforeUnmount(() => {
                     width="100%"
                     :document-server-url="props.documentServerUrl"
                     :config="editorConfig"
+                    :events_onDocumentReady="handleDocumentReady"
                     :on-load-component-error="handleLoadComponentError"
                 />
 

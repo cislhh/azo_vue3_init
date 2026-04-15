@@ -55,6 +55,10 @@ describe('useProjectDemandPage OnlyOffice editor setup', () => {
             },
             documentType: 'word',
             editorConfig: {
+                revisedFile: {
+                    fileType: 'docx',
+                    url: '/old.docx',
+                },
                 stampImageUrl: '/z.png',
             },
         });

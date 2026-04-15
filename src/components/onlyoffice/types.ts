@@ -18,6 +18,11 @@ export interface OnlyOfficeDocumentConfig {
     editorConfig: {
         callbackUrl?: string;
         plugins?: OnlyOfficePluginsConfig;
+        revisedFile?: {
+            fileType: 'docx';
+            token?: string;
+            url: string;
+        };
         stampImageUrl?: string;
     };
 }
