@@ -1,5 +1,7 @@
 import type { ApiResponse } from '../index';
 
+const ONLYOFFICE_KEY_MAX_LENGTH = 128;
+
 export interface GetProjectDemandContractTemplateInput {
     contractType: string;
 }
@@ -12,6 +14,13 @@ export interface ProjectDemandContractTemplateDto {
     documentKey: string;
     callbackUrl?: string;
     token?: string;
+}
+
+function createMockDocumentKey(baseKey: string) {
+    const suffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const maxBaseLength = Math.max(1, ONLYOFFICE_KEY_MAX_LENGTH - suffix.length - 1);
+
+    return `${baseKey.slice(0, maxBaseLength)}-${suffix}`;
 }
 
 export async function getProjectDemandContractTemplate(
@@ -36,11 +45,11 @@ export async function getProjectDemandContractTemplate(
             code: 200,
             message: 'success',
             data: {
-                documentUrl: '/old.docx',
+                documentUrl: '/new.docx',
                 fileType: 'docx',
                 documentType: 'word',
                 title: '产品需求文档模板.docx',
-                documentKey: 'project-demand-product-requirement',
+                documentKey: createMockDocumentKey('project-demand-product-requirement-new-docx'),
             },
         };
     }

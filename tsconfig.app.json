@@ -17,7 +17,7 @@
         "baseUrl": ".",
         "paths": { "@/*": ["src/*"] },
         "incremental": true,
-        "types": ["vite/client"], // ✅ 新增：让 TS 识别 import.meta.env
+        "types": ["vite/client", "node"], // ✅ 新增：让 TS 识别 import.meta.env
         "ignoreDeprecations": "5.0"
     },
     "include": [

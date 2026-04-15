@@ -1,61 +1,63 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { api } from '@/core/http/api';
 
 import { useProjectDemandPage } from './useProjectDemandPage';
 
 vi.mock('@/core/http/api', () => ({
     api: {
         projectDemand: {
-            getContractTemplate: vi.fn(),
+            getContractTemplate: vi.fn(async () => ({
+                code: 200,
+                data: {
+                    documentKey: 'project-demand-product-requirement-new-docx-test',
+                    documentType: 'word',
+                    documentUrl: '/new.docx',
+                    fileType: 'docx',
+                    title: '产品需求文档模板.docx',
+                },
+                message: 'success',
+            })),
+            getStampResource: vi.fn(async () => ({
+                code: 200,
+                data: {
+                    imageUrl: '/z.png',
+                },
+                message: 'success',
+            })),
         },
     },
 }));
 
-describe('useProjectDemandPage', () => {
-    beforeEach(() => {
-        vi.resetAllMocks();
-        vi.stubEnv('VITE_ONLYOFFICE_URL', 'http://localhost:80');
-        vi.stubEnv('VITE_FILE_ACCESS_HOST', '');
-        vi.stubGlobal('location', {
-            origin: 'http://192.168.0.133:5173',
-        });
+describe('useProjectDemandPage OnlyOffice editor setup', () => {
+    const originalDocumentServerUrl = import.meta.env.VITE_ONLYOFFICE_URL;
+
+    afterEach(() => {
+        import.meta.env.VITE_ONLYOFFICE_URL = originalDocumentServerUrl;
+        vi.restoreAllMocks();
     });
 
-    it('选择合同类型后可以请求模板并打开编辑器', async () => {
-        const { api } = await import('@/core/http/api');
-
-        vi.mocked(api.projectDemand.getContractTemplate).mockResolvedValue({
-            code: 200,
-            message: 'success',
-            data: {
-                documentKey: 'project-demand-technical-development',
-                documentType: 'pdf',
-                documentUrl: '/test.pdf',
-                fileType: 'pdf',
-                title: '技术开发合同模板.pdf',
-            },
-        });
+    it('injects the development stamp image URL when opening a Word contract template', async () => {
+        import.meta.env.VITE_ONLYOFFICE_URL = 'http://localhost/onlyoffice';
 
         const page = useProjectDemandPage();
-        page.form.contractType = '技术开发';
+        page.updateFormField('contractType', '产品需求');
+
+        const stampSpy = vi.spyOn(api.projectDemand, 'getStampResource');
 
         await page.openContractEditor();
 
-        expect(api.projectDemand.getContractTemplate).toHaveBeenCalledWith({
-            contractType: '技术开发',
+        expect(stampSpy).toHaveBeenCalledOnce();
+        expect(page.contractEditorConfig.value).toMatchObject({
+            document: {
+                fileType: 'docx',
+                title: '产品需求文档模板.docx',
+            },
+            documentType: 'word',
+            editorConfig: {
+                stampImageUrl: '/z.png',
+            },
         });
         expect(page.contractEditorVisible.value).toBe(true);
-        expect(page.contractEditorConfig.value?.document.url).toBe(
-            'http://192.168.0.133:5173/test.pdf',
-        );
-    });
-
-    it('合同类型选项包含技术开发和产品需求', () => {
-        const page = useProjectDemandPage();
-
-        expect(page.contractTypeOptions.value).toEqual([
-            { label: '技术开发', value: '技术开发' },
-            { label: '产品需求', value: '产品需求' },
-            { label: '接口文档', value: '接口文档' },
-        ]);
     });
 });

@@ -96,6 +96,7 @@ function createEmptyErrors(): ProjectDemandFormErrors {
 function mapContractTemplateToEditorConfig(
     template: ProjectDemandContractTemplateDto,
     documentUrl: string,
+    stampImageUrl?: string,
 ): OnlyOfficeDocumentConfig {
     return {
         document: {
@@ -107,6 +108,7 @@ function mapContractTemplateToEditorConfig(
         documentType: template.documentType,
         editorConfig: {
             callbackUrl: template.callbackUrl,
+            stampImageUrl,
         },
     };
 }
@@ -298,9 +300,15 @@ export function useProjectDemandPage() {
                 fileAccessHost: fileAccessHost.value,
             });
 
+            const stampImageUrl =
+                template.documentType === 'word'
+                    ? (await api.projectDemand.getStampResource()).data.imageUrl
+                    : undefined;
+
             contractEditorConfig.value = mapContractTemplateToEditorConfig(
                 template,
                 documentAccessUrl,
+                stampImageUrl,
             );
             contractEditorVisible.value = true;
         } catch (error) {

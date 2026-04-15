@@ -69,6 +69,7 @@ function handlePluginMessage(event: MessageEvent) {
         context: {
             fileType: props.config.document.fileType,
             mode: 'edit',
+            stampImageUrl: props.config.editorConfig.stampImageUrl,
         },
     });
 }

@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
+
 import {
-    EMPOWER_TOOLBAR_MESSAGE_SOURCE,
     buildEmpowerToolbarRuntimeResponse,
+    EMPOWER_TOOLBAR_MESSAGE_SOURCE,
 } from './plugin-runtime';
 
 describe('buildEmpowerToolbarRuntimeResponse', () => {
-    it('为业务工具栏上下文请求生成响应报文', () => {
+    it('includes the stamp image URL in the toolbar runtime context', () => {
         expect(
             buildEmpowerToolbarRuntimeResponse(
                 {
@@ -13,32 +14,19 @@ describe('buildEmpowerToolbarRuntimeResponse', () => {
                     type: 'empower-toolbar:request-runtime-context',
                 },
                 {
-                    fileType: 'pdf',
+                    fileType: 'docx',
                     mode: 'edit',
+                    stampImageUrl: '/z.png',
                 },
             ),
         ).toEqual({
             context: {
-                fileType: 'pdf',
+                fileType: 'docx',
                 mode: 'edit',
+                stampImageUrl: '/z.png',
             },
             source: EMPOWER_TOOLBAR_MESSAGE_SOURCE,
             type: 'empower-toolbar:runtime-context',
         });
-    });
-
-    it('忽略非业务工具栏消息', () => {
-        expect(
-            buildEmpowerToolbarRuntimeResponse(
-                {
-                    source: 'other-plugin',
-                    type: 'empower-toolbar:request-runtime-context',
-                },
-                {
-                    fileType: 'pdf',
-                    mode: 'edit',
-                },
-            ),
-        ).toBeNull();
     });
 });

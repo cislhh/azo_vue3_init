@@ -28,6 +28,8 @@
     return {
       mode: mode,
       fileType: fileType,
+      stampImageUrl:
+        typeof context.stampImageUrl === "string" ? context.stampImageUrl : "",
     };
   }
 

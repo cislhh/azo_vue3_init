@@ -1,6 +1,7 @@
 import { http } from './index';
 import { login } from './auth/login';
 import { getProjectDemandContractTemplate } from './project-demand/get-contract-template';
+import { getProjectDemandStampResource } from './project-demand/get-stamp-resource';
 
 export interface Post {
     userId: number;
@@ -47,6 +48,7 @@ export const api = {
     },
     projectDemand: {
         getContractTemplate: getProjectDemandContractTemplate,
+        getStampResource: getProjectDemandStampResource,
     },
     posts: {
         getAll: () => http.get<Post[]>('/posts'),

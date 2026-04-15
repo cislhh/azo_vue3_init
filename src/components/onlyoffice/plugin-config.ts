@@ -47,7 +47,7 @@ export function buildOnlyOfficePluginDefinitions(
     const pluginVersion = options.pluginVersion?.trim();
     const plugins: OnlyOfficePluginDefinition[] = [];
 
-    if (options.enableToolbar !== false) {
+    if (options.enableToolbar !== false && isWordDocument(options.documentType, options.fileType)) {
         plugins.push({
             autostart: true,
             configUrl: resolveAbsoluteUrl(EMPOWER_TOOLBAR_CONFIG_PATH, baseOrigin, pluginVersion),

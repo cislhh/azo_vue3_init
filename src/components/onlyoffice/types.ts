@@ -18,6 +18,7 @@ export interface OnlyOfficeDocumentConfig {
     editorConfig: {
         callbackUrl?: string;
         plugins?: OnlyOfficePluginsConfig;
+        stampImageUrl?: string;
     };
 }
 
@@ -31,4 +32,5 @@ export interface OnlyOfficePluginDefinition {
 export interface OnlyOfficePluginRuntimeContext {
     fileType: string;
     mode: OnlyOfficeEditorMode;
+    stampImageUrl?: string;
 }

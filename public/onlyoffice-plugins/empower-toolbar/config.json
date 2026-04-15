@@ -15,10 +15,7 @@
       ],
       "isViewer": false,
       "EditorsSupport": [
-        "word",
-        "cell",
-        "slide",
-        "pdf"
+        "word"
       ],
       "type": "background",
       "initDataType": "none",
