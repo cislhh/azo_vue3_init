@@ -30,6 +30,7 @@ export interface ProjectDemandFormModel {
     contractAmount: string;
     expenseAmount: string;
     campusCode: string;
+    expenseCardNo: string;
     department: string;
     undertakingUnit: string;
     principalUnit: string;
@@ -140,6 +141,7 @@ export function useProjectDemandPage() {
         contractAmount: '',
         expenseAmount: '',
         campusCode: '',
+        expenseCardNo: '',
         department: '数学学院',
         undertakingUnit: '吉林大学',
         principalUnit: '',
