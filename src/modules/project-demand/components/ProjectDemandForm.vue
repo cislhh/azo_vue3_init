@@ -3,7 +3,7 @@ import { NButton, NInput, NSelect } from 'naive-ui';
 
 import type { ProjectDemandFormModel } from '../composables/useProjectDemandPage';
 
-type SelectOption = { label: string; value: string };
+interface SelectOption { label: string; value: string }
 
 defineProps<{
     form: ProjectDemandFormModel;

@@ -1,3 +1,8 @@
+export {
+    buildEmpowerToolbarCompareRequest,
+    handleEmpowerToolbarCompareMessage,
+    type OnlyOfficeRevisedFilePayload,
+} from './compare-runtime';
 export { default as OnlyOfficeDocumentModal } from './OnlyOfficeDocumentModal.vue';
 export {
     buildOnlyOfficeAllowedOrigins,
@@ -11,11 +16,6 @@ export {
     EMPOWER_TOOLBAR_RUNTIME_TYPE,
     replyEmpowerToolbarRuntimeContext,
 } from './plugin-runtime';
-export {
-    buildEmpowerToolbarCompareRequest,
-    handleEmpowerToolbarCompareMessage,
-    type OnlyOfficeRevisedFilePayload,
-} from './compare-runtime';
 export type {
     OnlyOfficeDocumentConfig,
     OnlyOfficeDocumentType,
